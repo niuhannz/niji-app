@@ -176,13 +176,18 @@ export function VideoCard({ short, size = 'md' }: { short: Short; size?: 'sm' | 
       onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}
       onClick={() => handleWatch(short)}
     >
-      <div className={`${h} relative`} style={{ background: `linear-gradient(135deg, ${short.color1}22, ${short.color2}22)` }}>
-        <div className="absolute inset-0 opacity-40" style={{ background: `linear-gradient(135deg, ${short.color1}, ${short.color2})` }} />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-        <div className="absolute inset-0 flex items-center justify-center">
+      <div className={`${h} relative`} style={{ background: short.thumbnail ? '#000' : `linear-gradient(135deg, ${short.color1}22, ${short.color2}22)` }}>
+        {short.thumbnail ? (
+          <img src={short.thumbnail} alt={short.title} className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+        ) : (
+          <div className="absolute inset-0 opacity-40" style={{ background: `linear-gradient(135deg, ${short.color1}, ${short.color2})` }} />
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
           <div className="relative">
-            <div className="w-16 h-16 rounded-full opacity-20" style={{ background: `linear-gradient(135deg, ${short.color1}, ${short.color2})`, filter: 'blur(20px)' }} />
-            <Play className="absolute inset-0 m-auto w-8 h-8 text-white/60 group-hover:text-white group-hover:scale-110 transition-all" fill="currentColor" />
+            <div className="w-14 h-14 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center border border-white/20">
+              <Play className="w-7 h-7 text-white ml-0.5" fill="currentColor" />
+            </div>
           </div>
         </div>
 

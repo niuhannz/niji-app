@@ -1,18 +1,21 @@
 import type { Short, Project, Scene, Character, Comment } from './types'
 
+// Test video for all shorts (Pixabay royalty-free anime clip)
+export const TEST_VIDEO_URL = 'https://cdn.pixabay.com/video/2024/05/30/214500_large.mp4'
+
 export const SHORTS: Short[] = [
-  { id:'1', title:'Moonlit Duel', titleJP:'月光の決闘', creator:'AkiraStudio', avatar:'A', views:'2.4M', likes:'189K', duration:'3:42', genre:'Action', color1:'#ff2d78', color2:'#a855f7', isHot:true },
-  { id:'2', title:'Cherry Blossom Express', titleJP:'桜エクスプレス', creator:'SakuraManga', avatar:'S', views:'1.8M', likes:'142K', duration:'4:15', genre:'Romance', color1:'#ff8fab', color2:'#ffc2d1', isNew:true },
-  { id:'3', title:'Neon Ronin', titleJP:'ネオン浪人', creator:'CyberInk', avatar:'C', views:'3.1M', likes:'256K', duration:'2:58', genre:'Sci-Fi', color1:'#00d4ff', color2:'#a855f7', isHot:true },
-  { id:'4', title:'Spirit Garden', titleJP:'精霊の庭', creator:'MiyaArt', avatar:'M', views:'980K', likes:'87K', duration:'5:20', genre:'Fantasy', color1:'#00ffaa', color2:'#00d4ff' },
-  { id:'5', title:'Ramen Wars', titleJP:'ラーメン戦争', creator:'FoodAnime', avatar:'F', views:'4.2M', likes:'340K', duration:'2:30', genre:'Comedy', color1:'#ff6b2b', color2:'#ffd600', isHot:true },
-  { id:'6', title:'Shadow Protocol', titleJP:'影のプロトコル', creator:'DarkFrame', avatar:'D', views:'1.5M', likes:'120K', duration:'3:55', genre:'Thriller', color1:'#6366f1', color2:'#14b8a6' },
-  { id:'7', title:'Starlight Academy', titleJP:'星光学園', creator:'LumiDream', avatar:'L', views:'2.8M', likes:'210K', duration:'4:45', genre:'Slice of Life', color1:'#f59e0b', color2:'#ff2d78' },
-  { id:'8', title:'Mech Requiem', titleJP:'メカレクイエム', creator:'IronForge', avatar:'I', views:'1.2M', likes:'95K', duration:'6:10', genre:'Mecha', color1:'#ef4444', color2:'#7c3aed' },
-  { id:'9', title:'Whispers of Edo', titleJP:'江戸の囁き', creator:'HistoriaJP', avatar:'H', views:'670K', likes:'56K', duration:'5:00', genre:'Historical', color1:'#d4a574', color2:'#8b5e3c', isNew:true },
-  { id:'10', title:'Pixel Hearts', titleJP:'ピクセルハート', creator:'RetroWave', avatar:'R', views:'890K', likes:'78K', duration:'3:12', genre:'Romance', color1:'#ec4899', color2:'#f472b6' },
-  { id:'11', title:'Dragon Summit', titleJP:'竜の頂上', creator:'MythForge', avatar:'M', views:'5.1M', likes:'420K', duration:'7:30', genre:'Fantasy', color1:'#dc2626', color2:'#f97316', isHot:true },
-  { id:'12', title:'Cybernetic Dream', titleJP:'電脳夢', creator:'NeoTokyo', avatar:'N', views:'1.9M', likes:'155K', duration:'4:02', genre:'Sci-Fi', color1:'#06b6d4', color2:'#8b5cf6' },
+  { id:'1', title:'Moonlit Duel', titleJP:'月光の決闘', creator:'AkiraStudio', avatar:'A', views:'2.4M', likes:'189K', duration:'3:42', genre:'Action', color1:'#ff2d78', color2:'#a855f7', isHot:true, thumbnail:'https://cdn.pixabay.com/photo/2024/07/17/16/18/firefighter-8901924_640.jpg', videoUrl:TEST_VIDEO_URL },
+  { id:'2', title:'Cherry Blossom Express', titleJP:'桜エクスプレス', creator:'SakuraManga', avatar:'S', views:'1.8M', likes:'142K', duration:'4:15', genre:'Romance', color1:'#ff8fab', color2:'#ffc2d1', isNew:true, thumbnail:'https://cdn.pixabay.com/photo/2024/12/21/09/02/anime-sunset-9281578_640.png', videoUrl:TEST_VIDEO_URL },
+  { id:'3', title:'Neon Ronin', titleJP:'ネオン浪人', creator:'CyberInk', avatar:'C', views:'3.1M', likes:'256K', duration:'2:58', genre:'Sci-Fi', color1:'#00d4ff', color2:'#a855f7', isHot:true, thumbnail:'https://cdn.pixabay.com/photo/2022/08/31/20/47/concert-7424190_640.jpg', videoUrl:TEST_VIDEO_URL },
+  { id:'4', title:'Spirit Garden', titleJP:'精霊の庭', creator:'MiyaArt', avatar:'M', views:'980K', likes:'87K', duration:'5:20', genre:'Fantasy', color1:'#00ffaa', color2:'#00d4ff', thumbnail:'https://cdn.pixabay.com/photo/2023/09/27/14/42/magical-8279647_640.png', videoUrl:TEST_VIDEO_URL },
+  { id:'5', title:'Ramen Wars', titleJP:'ラーメン戦争', creator:'FoodAnime', avatar:'F', views:'4.2M', likes:'340K', duration:'2:30', genre:'Comedy', color1:'#ff6b2b', color2:'#ffd600', isHot:true, thumbnail:'https://cdn.pixabay.com/photo/2022/12/01/04/40/backpacker-7628303_640.jpg', videoUrl:TEST_VIDEO_URL },
+  { id:'6', title:'Shadow Protocol', titleJP:'影のプロトコル', creator:'DarkFrame', avatar:'D', views:'1.5M', likes:'120K', duration:'3:55', genre:'Thriller', color1:'#6366f1', color2:'#14b8a6', thumbnail:'https://cdn.pixabay.com/photo/2023/11/10/16/05/anime-8379662_640.jpg', videoUrl:TEST_VIDEO_URL },
+  { id:'7', title:'Starlight Academy', titleJP:'星光学園', creator:'LumiDream', avatar:'L', views:'2.8M', likes:'210K', duration:'4:45', genre:'Slice of Life', color1:'#f59e0b', color2:'#ff2d78', thumbnail:'https://cdn.pixabay.com/photo/2021/08/31/09/54/anime-6588363_640.jpg', videoUrl:TEST_VIDEO_URL },
+  { id:'8', title:'Mech Requiem', titleJP:'メカレクイエム', creator:'IronForge', avatar:'I', views:'1.2M', likes:'95K', duration:'6:10', genre:'Mecha', color1:'#ef4444', color2:'#7c3aed', thumbnail:'https://cdn.pixabay.com/photo/2023/10/23/02/41/anime-8335148_640.png', videoUrl:TEST_VIDEO_URL },
+  { id:'9', title:'Whispers of Edo', titleJP:'江戸の囁き', creator:'HistoriaJP', avatar:'H', views:'670K', likes:'56K', duration:'5:00', genre:'Historical', color1:'#d4a574', color2:'#8b5e3c', isNew:true, thumbnail:'https://cdn.pixabay.com/photo/2024/09/21/10/53/anime-9063542_640.png', videoUrl:TEST_VIDEO_URL },
+  { id:'10', title:'Pixel Hearts', titleJP:'ピクセルハート', creator:'RetroWave', avatar:'R', views:'890K', likes:'78K', duration:'3:12', genre:'Romance', color1:'#ec4899', color2:'#f472b6', thumbnail:'https://cdn.pixabay.com/photo/2023/06/02/15/46/ai-generated-8035998_640.png', videoUrl:TEST_VIDEO_URL },
+  { id:'11', title:'Dragon Summit', titleJP:'竜の頂上', creator:'MythForge', avatar:'M', views:'5.1M', likes:'420K', duration:'7:30', genre:'Fantasy', color1:'#dc2626', color2:'#f97316', isHot:true, thumbnail:'https://cdn.pixabay.com/photo/2020/12/18/04/39/clouds-5841174_640.jpg', videoUrl:TEST_VIDEO_URL },
+  { id:'12', title:'Cybernetic Dream', titleJP:'電脳夢', creator:'NeoTokyo', avatar:'N', views:'1.9M', likes:'155K', duration:'4:02', genre:'Sci-Fi', color1:'#06b6d4', color2:'#8b5cf6', thumbnail:'https://cdn.pixabay.com/photo/2023/06/12/00/46/woman-8057323_640.png', videoUrl:TEST_VIDEO_URL },
 ]
 
 export const GENRES = ['All','Action','Romance','Sci-Fi','Fantasy','Comedy','Thriller','Mecha','Slice of Life','Historical']

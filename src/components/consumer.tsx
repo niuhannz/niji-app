@@ -38,8 +38,12 @@ export function HomeFeed() {
         {/* Hero - auto rotating */}
         <div className="relative rounded-2xl overflow-hidden mb-8 h-[200px] niji-gradient-border cursor-pointer"
           onClick={() => handleWatch(hero)}>
-          <div className="absolute inset-0 transition-all duration-700" style={{ background: `linear-gradient(135deg, ${hero.color1}25, ${hero.color2}25)` }} />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#08080f] via-transparent to-transparent" />
+          {hero.thumbnail ? (
+            <img src={hero.thumbnail} alt={hero.title} className="absolute inset-0 w-full h-full object-cover transition-all duration-700" key={`img-${hero.id}`} />
+          ) : (
+            <div className="absolute inset-0 transition-all duration-700" style={{ background: `linear-gradient(135deg, ${hero.color1}25, ${hero.color2}25)` }} />
+          )}
+          <div className="absolute inset-0 bg-gradient-to-t from-[#08080f] via-[#08080f]/40 to-transparent" />
           <div className="absolute bottom-0 left-0 p-6 transition-all duration-500" key={hero.id}>
             <div className="flex items-center gap-2 mb-2">
               <Badge className="bg-[#ff2d78]/20 text-[#ff2d78] border-[#ff2d78]/30 text-[10px]"><Flame className="w-3 h-3 mr-1" />{t('home.trendingNow')}</Badge>
@@ -218,35 +222,60 @@ export function Player() {
   const { watchingShort: short, handleBack, likedShorts, toggleLike, savedShorts, toggleSave,
     comments, addComment, toggleCommentLike, addToast, setShareModalOpen, followedCreators, toggleFollow } = useApp()
   const { t, lang } = useI18n()
-  const [playing, setPlaying] = useState(true)
+  const [playing, setPlaying] = useState(false)
   const [progress, setProgress] = useState(0)
   const [volume, setVolume] = useState(75)
   const [muted, setMuted] = useState(false)
   const [commentText, setCommentText] = useState('')
   const [isFollowing, setIsFollowing] = useState(false)
+  const [currentTime, setCurrentTime] = useState(0)
+  const [videoDuration, setVideoDuration] = useState(0)
   const progressRef = useRef<HTMLDivElement>(null)
   const volumeRef = useRef<HTMLDivElement>(null)
-  const timerRef = useRef<number>()
+  const videoRef = useRef<HTMLVideoElement>(null)
 
   if (!short) return null
   const liked = likedShorts.has(short.id)
   const saved = savedShorts.has(short.id)
   const creatorFollowed = followedCreators.has(short.creator)
 
-  // Auto-advance progress when playing
+  // Sync video play state
   useEffect(() => {
-    if (playing) {
-      timerRef.current = window.setInterval(() => {
-        setProgress(p => p >= 100 ? (setPlaying(false), 100) : p + 0.3)
-      }, 100)
-    }
-    return () => clearInterval(timerRef.current)
+    const vid = videoRef.current
+    if (!vid) return
+    if (playing) { vid.play().catch(() => setPlaying(false)) } else { vid.pause() }
   }, [playing])
 
+  // Sync volume
+  useEffect(() => {
+    const vid = videoRef.current
+    if (!vid) return
+    vid.volume = muted ? 0 : volume / 100
+    vid.muted = muted
+  }, [volume, muted])
+
+  // Auto-play on mount
+  useEffect(() => {
+    const vid = videoRef.current
+    if (!vid || !short.videoUrl) return
+    vid.volume = volume / 100
+    vid.play().then(() => setPlaying(true)).catch(() => {})
+  }, [short.id])
+
+  const handleTimeUpdate = () => {
+    const vid = videoRef.current
+    if (!vid || !vid.duration) return
+    setCurrentTime(vid.currentTime)
+    setVideoDuration(vid.duration)
+    setProgress((vid.currentTime / vid.duration) * 100)
+  }
+
   const handleProgressClick = (e: React.MouseEvent) => {
-    if (!progressRef.current) return
+    if (!progressRef.current || !videoRef.current) return
     const rect = progressRef.current.getBoundingClientRect()
-    setProgress(Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100)))
+    const pct = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100))
+    setProgress(pct)
+    videoRef.current.currentTime = (pct / 100) * videoRef.current.duration
   }
 
   const handleVolumeClick = (e: React.MouseEvent) => {
@@ -263,25 +292,50 @@ export function Player() {
     addToast('Comment posted!', 'success', '💬')
   }
 
-  const durParts = short.duration.split(':')
-  const totalSec = parseInt(durParts[0]) * 60 + parseInt(durParts[1])
-  const currentSec = Math.floor(totalSec * progress / 100)
-  const timeStr = `${Math.floor(currentSec / 60)}:${String(currentSec % 60).padStart(2, '0')}`
+  const skipBy = (sec: number) => {
+    const vid = videoRef.current
+    if (!vid) return
+    vid.currentTime = Math.max(0, Math.min(vid.duration, vid.currentTime + sec))
+  }
+
+  const displayTime = videoDuration > 0 ? currentTime : 0
+  const displayDuration = videoDuration > 0 ? videoDuration : (() => { const p = short.duration.split(':'); return parseInt(p[0]) * 60 + parseInt(p[1]) })()
+  const timeStr = `${Math.floor(displayTime / 60)}:${String(Math.floor(displayTime % 60)).padStart(2, '0')}`
+  const durStr = `${Math.floor(displayDuration / 60)}:${String(Math.floor(displayDuration % 60)).padStart(2, '0')}`
 
   return (
     <div className="h-full flex animate-fade-in">
       <div className="flex-1 flex flex-col">
-        <div className="flex-1 relative" style={{ background: `linear-gradient(135deg, ${short.color1}15, ${short.color2}15)` }}>
-          <div className="absolute inset-0" style={{ background: `radial-gradient(ellipse at center, ${short.color1}10, transparent 70%)` }} />
+        <div className="flex-1 relative bg-black">
+          {short.videoUrl ? (
+            <video
+              ref={videoRef}
+              src={short.videoUrl}
+              poster={short.thumbnail}
+              className="absolute inset-0 w-full h-full object-contain"
+              onTimeUpdate={handleTimeUpdate}
+              onEnded={() => setPlaying(false)}
+              onLoadedMetadata={() => { if (videoRef.current) setVideoDuration(videoRef.current.duration) }}
+              loop={false}
+              playsInline
+            />
+          ) : (
+            <>
+              <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, ${short.color1}15, ${short.color2}15)` }} />
+              <div className="absolute inset-0" style={{ background: `radial-gradient(ellipse at center, ${short.color1}10, transparent 70%)` }} />
+            </>
+          )}
           <button onClick={handleBack} className="absolute top-4 left-4 z-10 w-8 h-8 rounded-full glass flex items-center justify-center text-white/60 hover:text-white transition-all"><ChevronLeft className="w-4 h-4" /></button>
-          <div className="absolute inset-0 flex items-center justify-center">
-            <button onClick={() => setPlaying(!playing)} className="w-16 h-16 rounded-full glass-strong flex items-center justify-center text-white/80 hover:text-white hover:scale-110 transition-all">
-              {playing ? <Pause className="w-7 h-7" /> : <Play className="w-7 h-7 ml-1" fill="currentColor" />}
-            </button>
+          <div className="absolute inset-0 flex items-center justify-center cursor-pointer" onClick={() => setPlaying(!playing)}>
+            {!playing && (
+              <button className="w-16 h-16 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white/90 hover:scale-110 transition-all border border-white/20">
+                <Play className="w-7 h-7 ml-1" fill="currentColor" />
+              </button>
+            )}
           </div>
-          <div className="absolute bottom-20 left-6">
-            <p className="text-xs text-white/30 mb-1">{lang === 'ja' ? short.title : short.titleJP}</p>
-            <h2 className="text-xl font-black" style={{ fontFamily: 'Outfit' }}>{short.title}</h2>
+          <div className="absolute bottom-20 left-6 pointer-events-none">
+            <p className="text-xs text-white/50 mb-1 drop-shadow-lg">{lang === 'ja' ? short.title : short.titleJP}</p>
+            <h2 className="text-xl font-black drop-shadow-lg" style={{ fontFamily: 'Outfit' }}>{short.title}</h2>
           </div>
 
           {/* Progress bar - clickable */}
@@ -292,15 +346,15 @@ export function Player() {
                 <div className="h-full rounded-full transition-[width] duration-100" style={{ width: `${progress}%`, background: `linear-gradient(90deg, ${short.color1}, ${short.color2})` }} />
                 <div className="absolute top-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-white shadow-lg opacity-0 group-hover:opacity-100 transition-opacity" style={{ left: `calc(${progress}% - 6px)` }} />
               </div>
-              <span className="text-[10px] text-white/40 w-8 font-mono">{short.duration}</span>
+              <span className="text-[10px] text-white/40 w-8 font-mono">{durStr}</span>
             </div>
             <div className="flex items-center justify-between mt-2">
               <div className="flex items-center gap-2">
-                <button onClick={() => setProgress(Math.max(0, progress - 10))} className="text-white/40 hover:text-white transition-all"><SkipBack className="w-4 h-4" /></button>
+                <button onClick={() => skipBy(-10)} className="text-white/40 hover:text-white transition-all"><SkipBack className="w-4 h-4" /></button>
                 <button onClick={() => setPlaying(!playing)} className="text-white/80 hover:text-white transition-all">
                   {playing ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" fill="currentColor" />}
                 </button>
-                <button onClick={() => setProgress(Math.min(100, progress + 10))} className="text-white/40 hover:text-white transition-all"><SkipForward className="w-4 h-4" /></button>
+                <button onClick={() => skipBy(10)} className="text-white/40 hover:text-white transition-all"><SkipForward className="w-4 h-4" /></button>
                 <div className="flex items-center gap-1.5 ml-2">
                   <button onClick={() => setMuted(!muted)} className="text-white/40 hover:text-white transition-all">
                     {muted || volume === 0 ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5" />}

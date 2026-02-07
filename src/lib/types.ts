@@ -5,6 +5,7 @@ export interface Short {
   id: string; title: string; titleJP: string; creator: string; avatar: string
   views: string; likes: string; duration: string; genre: string
   color1: string; color2: string; ep?: string; isNew?: boolean; isHot?: boolean
+  thumbnail?: string; videoUrl?: string
 }
 
 export interface Project {
