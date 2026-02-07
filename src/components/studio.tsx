@@ -15,11 +15,13 @@ import { Progress } from '@/components/ui/progress'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
 import { useApp } from '@/lib/context'
+import { useI18n } from '@/lib/i18n'
 import { ART_STYLES, EXPRESSIONS, POSES } from '@/lib/data'
 
 // ─── Studio Dashboard ────────────────────────────────
 export function StudioDashboard() {
   const { projects, deleteProject, addToast, setView, setNewProjectModalOpen } = useApp()
+  const { t } = useI18n()
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
 
   return (
@@ -28,17 +30,17 @@ export function StudioDashboard() {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-black mb-1" style={{ fontFamily: 'Outfit' }}><span className="niji-gradient-text">Creator Studio</span></h1>
-            <p className="text-sm text-white/40">Welcome back, Han. 素晴らしいものを作ろう</p>
+            <p className="text-sm text-white/40">{t('studio.welcome')}</p>
           </div>
         </div>
 
         {/* Stats */}
         <div className="grid grid-cols-4 gap-3 mb-8 stagger-children">
           {[
-            { label: 'Total Views', value: '24.8K', change: '+12%', icon: Eye, color: '#ff2d78' },
-            { label: 'Followers', value: '1,240', change: '+8%', icon: Users2, color: '#a855f7' },
-            { label: 'Likes', value: '5.6K', change: '+15%', icon: Heart, color: '#00d4ff' },
-            { label: 'Projects', value: String(projects.length), change: '', icon: Folder, color: '#00ffaa' },
+            { label: t('studio.totalViews'), value: '24.8K', change: '+12%', icon: Eye, color: '#ff2d78' },
+            { label: t('studio.followers'), value: '1,240', change: '+8%', icon: Users2, color: '#a855f7' },
+            { label: t('studio.likes'), value: '5.6K', change: '+15%', icon: Heart, color: '#00d4ff' },
+            { label: t('studio.projects'), value: String(projects.length), change: '', icon: Folder, color: '#00ffaa' },
           ].map(s => (
             <div key={s.label} className="rounded-xl p-4 glass hover:bg-white/[0.04] transition-all">
               <div className="flex items-center justify-between mb-2">
@@ -53,7 +55,7 @@ export function StudioDashboard() {
 
         {/* Quick Actions */}
         <div className="mb-8">
-          <h2 className="text-sm font-semibold mb-3 text-white/60">Quick Create クイック作成</h2>
+          <h2 className="text-sm font-semibold mb-3 text-white/60">{t('studio.quickCreate')}</h2>
           <div className="grid grid-cols-3 gap-3 stagger-children">
             {[
               { label: 'Text → Animation', desc: 'Generate from prompt', icon: Sparkles, gradient: 'from-[#ff2d78] to-[#a855f7]', view: 'ai-gen' as const },
@@ -75,7 +77,7 @@ export function StudioDashboard() {
         {/* Projects */}
         <div>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-semibold text-white/60">Your Projects プロジェクト ({projects.length})</h2>
+            <h2 className="text-sm font-semibold text-white/60">{t('studio.yourProjects')} ({projects.length})</h2>
             <div className="flex gap-1">
               <button onClick={() => setViewMode('grid')} className={`w-7 h-7 rounded-lg flex items-center justify-center ${viewMode === 'grid' ? 'bg-white/5 text-white/40' : 'text-white/20 hover:bg-white/5'}`}><LayoutGrid className="w-3.5 h-3.5" /></button>
               <button onClick={() => setViewMode('list')} className={`w-7 h-7 rounded-lg flex items-center justify-center ${viewMode === 'list' ? 'bg-white/5 text-white/40' : 'text-white/20 hover:bg-white/5'}`}><Grid3X3 className="w-3.5 h-3.5" /></button>
@@ -116,9 +118,9 @@ export function StudioDashboard() {
           {projects.length === 0 && (
             <div className="text-center py-16">
               <Film className="w-10 h-10 text-white/10 mx-auto mb-3" />
-              <p className="text-sm text-white/30 mb-3">No projects yet</p>
+              <p className="text-sm text-white/30 mb-3">{t('studio.noProjects')}</p>
               <Button onClick={() => setNewProjectModalOpen(true)} size="sm" className="bg-gradient-to-r from-[#ff2d78] to-[#a855f7] border-0 gap-1.5 text-xs">
-                <Plus className="w-3.5 h-3.5" />Create Your First Project
+                <Plus className="w-3.5 h-3.5" />{t('studio.createFirst')}
               </Button>
             </div>
           )}
@@ -131,6 +133,7 @@ export function StudioDashboard() {
 // ─── AI Generator ────────────────────────────────────
 export function AIGenerator() {
   const { addToast, addGenHistory, genHistory, setView } = useApp()
+  const { t } = useI18n()
   const [prompt, setPrompt] = useState('')
   const [generating, setGenerating] = useState(false)
   const [progress, setProgress] = useState(0)
@@ -192,7 +195,7 @@ export function AIGenerator() {
               <span className="text-xs font-medium text-[#ff2d78]">AI Animation Engine v2.0</span>
             </div>
             <h1 className="text-3xl font-black mb-2" style={{ fontFamily: 'Outfit' }}><span className="niji-gradient-text">Text → Animation</span></h1>
-            <p className="text-sm text-white/40">テキストからアニメーションへ</p>
+            <p className="text-sm text-white/40">{t('aiGen.subtitle')}</p>
           </div>
 
           {/* Prompt Box */}
@@ -201,7 +204,7 @@ export function AIGenerator() {
               <div className="flex items-center gap-2"><Bot className="w-4 h-4 text-[#a855f7]" /><span className="text-xs font-semibold text-white/60">Prompt</span></div>
               {genHistory.length > 0 && (
                 <button onClick={() => setShowHistory(!showHistory)} className="text-[10px] text-white/30 hover:text-white/50">
-                  History ({genHistory.length})
+                  {t('aiGen.history')} ({genHistory.length})
                 </button>
               )}
             </div>
@@ -222,7 +225,7 @@ export function AIGenerator() {
           {/* History dropdown */}
           {showHistory && genHistory.length > 0 && (
             <div className="rounded-xl glass-strong mb-4 overflow-hidden animate-fade-in-up">
-              <div className="p-3 border-b border-white/5"><span className="text-xs font-semibold text-white/50">Generation History</span></div>
+              <div className="p-3 border-b border-white/5"><span className="text-xs font-semibold text-white/50">{t('aiGen.history')}</span></div>
               {genHistory.slice(0, 5).map(g => (
                 <button key={g.id} onClick={() => { setPrompt(g.prompt); setShowHistory(false) }}
                   className="w-full text-left px-3 py-2.5 hover:bg-white/5 transition-all border-b border-white/5 last:border-0">
@@ -235,7 +238,7 @@ export function AIGenerator() {
 
           {/* Templates */}
           <div className="mb-4">
-            <p className="text-[10px] text-white/30 mb-2">TEMPLATES テンプレート</p>
+            <p className="text-[10px] text-white/30 mb-2">{t('aiGen.templates')}</p>
             <div className="flex gap-2 flex-wrap">
               {['Epic sword battle in the rain','Quiet café conversation at sunset','Spaceship chase through asteroid field','Magical girl transformation sequence','Emotional farewell at cherry blossom station','Robot awakens in abandoned factory'].map(t => (
                 <button key={t} onClick={() => setPrompt(t)} className="px-3 py-1.5 rounded-full bg-white/5 text-[10px] text-white/40 hover:text-white/60 hover:bg-white/8 border border-white/5 hover:border-white/10 transition-all">{t}</button>
@@ -250,7 +253,7 @@ export function AIGenerator() {
                 <div className="absolute inset-0 rounded-full niji-gradient animate-spin-slow opacity-30" />
                 <div className="absolute inset-[3px] rounded-full bg-[#08080f] flex items-center justify-center"><Sparkles className="w-6 h-6 text-[#ff2d78] animate-pulse" /></div>
               </div>
-              <p className="text-sm font-semibold mb-1">Generating your animation...</p>
+              <p className="text-sm font-semibold mb-1">{t('aiGen.generating')}</p>
               <p className="text-xs text-white/40 mb-4">{stage}</p>
               <Progress value={progress} className="h-1.5 bg-white/5 mb-2" />
               <div className="flex justify-between text-[10px] text-white/30"><span>{stage}</span><span>{Math.floor(progress)}%</span></div>
@@ -260,7 +263,7 @@ export function AIGenerator() {
               <div className="p-4 glass-strong mb-1 rounded-t-2xl">
                 <div className="flex items-center gap-2 mb-3">
                   <Check className="w-5 h-5 text-[#00ffaa]" />
-                  <span className="text-sm font-semibold">Animation Generated!</span>
+                  <span className="text-sm font-semibold">{t('aiGen.generated')}</span>
                   <span className="text-xs text-white/40 ml-auto">{resultScenes.length} scenes · {duration[0]}s · {fps}fps</span>
                 </div>
                 {/* Scene strip preview */}
@@ -278,12 +281,12 @@ export function AIGenerator() {
                 <Button variant="outline" className="h-10 w-10 p-0 border-white/10 text-white/40"><Download className="w-4 h-4" /></Button>
               </div>
               <Button onClick={() => { setProgress(0); setResultScenes([]) }} variant="ghost" className="w-full mt-2 text-xs text-white/30 hover:text-white/50 h-8">
-                Generate Another
+                {t('aiGen.generateAnother')}
               </Button>
             </div>
           ) : (
             <Button onClick={startGenerate} disabled={!prompt.trim()} className="w-full h-12 text-sm font-bold bg-gradient-to-r from-[#ff2d78] via-[#a855f7] to-[#00d4ff] hover:opacity-90 border-0 gap-2 animate-gradient-x disabled:opacity-30">
-              <Sparkles className="w-4 h-4" />Generate Animation アニメーション生成
+              <Sparkles className="w-4 h-4" />{t('aiGen.generate')}
             </Button>
           )}
         </div>
@@ -291,9 +294,9 @@ export function AIGenerator() {
 
       {/* Settings Panel */}
       <div className="w-[280px] glass-strong p-5 overflow-auto">
-        <h3 className="text-sm font-semibold mb-4 flex items-center gap-2"><Settings className="w-4 h-4 text-white/40" />Settings</h3>
+        <h3 className="text-sm font-semibold mb-4 flex items-center gap-2"><Settings className="w-4 h-4 text-white/40" />{t('aiGen.settings')}</h3>
         <div className="mb-5">
-          <label className="text-[10px] text-white/40 font-medium mb-2 block">ART STYLE スタイル</label>
+          <label className="text-[10px] text-white/40 font-medium mb-2 block">{t('aiGen.artStyle')}</label>
           <div className="grid grid-cols-2 gap-2">
             {ART_STYLES.map(s => (
               <button key={s.id} onClick={() => setStyle(s.id)}
@@ -316,7 +319,7 @@ export function AIGenerator() {
         </div>
         <div className="mb-5">
           <div className="flex items-center justify-between mb-2">
-            <label className="text-[10px] text-white/40 font-medium">DURATION 長さ</label>
+            <label className="text-[10px] text-white/40 font-medium">{t('aiGen.duration')}</label>
             <span className="text-xs font-semibold text-[#00d4ff]">{duration[0]}s</span>
           </div>
           <Slider value={duration} onValueChange={setDuration} min={5} max={120} step={5} />
@@ -356,6 +359,7 @@ export function AIGenerator() {
 // ─── Character Lab ───────────────────────────────────
 export function CharacterLab() {
   const { characters, addCharacter, updateCharacter, deleteCharacter, addToast } = useApp()
+  const { t } = useI18n()
   const [selectedIdx, setSelectedIdx] = useState(0)
   const [descInput, setDescInput] = useState('')
   const [regenerating, setRegenerating] = useState(false)
@@ -424,7 +428,7 @@ export function CharacterLab() {
           </div>
         </ScrollArea>
         <Button onClick={handleNewChar} className="w-full h-9 mt-3 text-xs bg-gradient-to-r from-[#00d4ff] to-[#a855f7] hover:opacity-90 border-0 gap-1.5 font-semibold">
-          <Sparkles className="w-3.5 h-3.5" />Generate New
+          <Sparkles className="w-3.5 h-3.5" />{t('charLab.generateNew')}
         </Button>
       </div>
 
@@ -453,14 +457,14 @@ export function CharacterLab() {
             {ch.traits.map(t => <Badge key={t} variant="outline" className="text-[10px] border-white/10 text-white/50">{t}</Badge>)}
           </div>
           <div className="flex gap-2 justify-center">
-            <Button size="sm" className="h-8 px-4 text-xs bg-white/5 border border-white/10 text-white/60 hover:bg-white/8 gap-1.5"><Copy className="w-3.5 h-3.5" />Clone</Button>
+            <Button size="sm" className="h-8 px-4 text-xs bg-white/5 border border-white/10 text-white/60 hover:bg-white/8 gap-1.5"><Copy className="w-3.5 h-3.5" />{t('charLab.clone')}</Button>
           </div>
         </div>
       </div>
 
       {/* Properties */}
       <div className="w-[280px] glass-strong p-5 overflow-auto">
-        <h3 className="text-sm font-semibold mb-4 flex items-center gap-2"><Palette className="w-4 h-4 text-white/40" />Properties</h3>
+        <h3 className="text-sm font-semibold mb-4 flex items-center gap-2"><Palette className="w-4 h-4 text-white/40" />{t('charLab.properties')}</h3>
         <div className="space-y-4">
           <div>
             <label className="text-[10px] text-white/40 font-medium mb-1.5 block">NAME</label>
@@ -476,7 +480,7 @@ export function CharacterLab() {
           </div>
           <Separator className="bg-white/5" />
           <div>
-            <label className="text-[10px] text-white/40 font-medium mb-2 block">EXPRESSIONS 表情</label>
+            <label className="text-[10px] text-white/40 font-medium mb-2 block">{t('charLab.expressions')}</label>
             <div className="grid grid-cols-4 gap-1.5">
               {EXPRESSIONS.map(e => (
                 <button key={e} onClick={() => updateCharacter(ch.id, { expression: e })}
@@ -489,7 +493,7 @@ export function CharacterLab() {
             </div>
           </div>
           <div>
-            <label className="text-[10px] text-white/40 font-medium mb-2 block">POSES ポーズ</label>
+            <label className="text-[10px] text-white/40 font-medium mb-2 block">{t('charLab.poses')}</label>
             <div className="grid grid-cols-3 gap-1.5">
               {POSES.map(p => (
                 <button key={p} onClick={() => updateCharacter(ch.id, { pose: p })}
@@ -502,7 +506,7 @@ export function CharacterLab() {
             </div>
           </div>
           <div>
-            <label className="text-[10px] text-white/40 font-medium mb-2 block">VOICE 声</label>
+            <label className="text-[10px] text-white/40 font-medium mb-2 block">{t('charLab.voice')}</label>
             <div className="grid grid-cols-2 gap-2">
               {[{ label:'Deep Male', icon:Mic },{ label:'Soft Female', icon:Mic },{ label:'Young', icon:Mic },{ label:'AI Custom', icon:Sparkles }].map(v => (
                 <button key={v.label} className="h-9 rounded-lg bg-white/5 text-[10px] text-white/40 hover:bg-white/8 flex items-center justify-center gap-1.5 transition-all">
@@ -513,7 +517,7 @@ export function CharacterLab() {
           </div>
           <Button onClick={handleRegenerate} disabled={regenerating} className="w-full h-9 text-xs bg-gradient-to-r from-[#a855f7] to-[#ff2d78] hover:opacity-90 border-0 gap-1.5 font-semibold disabled:opacity-50">
             {regenerating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
-            {regenerating ? 'Regenerating...' : 'Regenerate with AI'}
+            {regenerating ? t('charLab.regenerating') : t('charLab.regenerate')}
           </Button>
         </div>
       </div>
@@ -524,6 +528,7 @@ export function CharacterLab() {
 // ─── Timeline Editor ─────────────────────────────────
 export function TimelineEditor() {
   const { scenes, addScene, deleteScene, updateScene, addToast } = useApp()
+  const { t } = useI18n()
   const [selectedScene, setSelectedScene] = useState(0)
   const [playheadPos, setPlayheadPos] = useState(0)
   const [isPlaying, setIsPlaying] = useState(false)
@@ -585,7 +590,7 @@ export function TimelineEditor() {
         </div>
         <div className="flex items-center gap-2">
           <span className="text-[10px] text-white/30">{scenes.length} scenes</span>
-          <Button size="sm" className="h-8 px-3 text-xs bg-[#00ffaa]/20 text-[#00ffaa] border border-[#00ffaa]/30 hover:bg-[#00ffaa]/30 gap-1.5 font-medium"><Download className="w-3.5 h-3.5" />Export</Button>
+          <Button size="sm" className="h-8 px-3 text-xs bg-[#00ffaa]/20 text-[#00ffaa] border border-[#00ffaa]/30 hover:bg-[#00ffaa]/30 gap-1.5 font-medium"><Download className="w-3.5 h-3.5" />{t('timeline.export')}</Button>
         </div>
       </div>
 
@@ -607,7 +612,7 @@ export function TimelineEditor() {
 
         {/* Properties */}
         <div className="w-[260px] glass-strong p-4 overflow-auto">
-          <h3 className="text-xs font-semibold text-white/60 mb-3">SCENE PROPERTIES</h3>
+          <h3 className="text-xs font-semibold text-white/60 mb-3">{t('timeline.sceneProps')}</h3>
           {scene && (
             <div className="space-y-3">
               <div><label className="text-[10px] text-white/30 block mb-1">Name</label>
@@ -618,7 +623,7 @@ export function TimelineEditor() {
               </div>
               <Separator className="bg-white/5" />
               <div>
-                <label className="text-[10px] text-white/30 block mb-2">LAYERS</label>
+                <label className="text-[10px] text-white/30 block mb-2">{t('timeline.layers')}</label>
                 {Object.entries(layerVis).map(([key, vis], i) => (
                   <div key={key} onClick={() => setLayerVis(prev => ({ ...prev, [key]: !prev[key as keyof typeof prev] }))}
                     className="flex items-center justify-between py-1.5 px-2 rounded-lg hover:bg-white/5 transition-all cursor-pointer">
@@ -633,7 +638,7 @@ export function TimelineEditor() {
                 ))}
               </div>
               <Button size="sm" className="w-full h-8 text-[10px] bg-gradient-to-r from-[#a855f7] to-[#00d4ff] hover:opacity-90 border-0 gap-1.5 font-semibold">
-                <Sparkles className="w-3 h-3" />AI Enhance Scene
+                <Sparkles className="w-3 h-3" />{t('timeline.aiEnhance')}
               </Button>
             </div>
           )}
@@ -643,7 +648,7 @@ export function TimelineEditor() {
       {/* Timeline */}
       <div className="h-[180px] glass-strong border-t border-white/5 flex flex-col">
         <div className="h-8 flex items-center px-4 border-b border-white/5">
-          <div className="flex items-center gap-2"><Film className="w-3.5 h-3.5 text-white/30" /><span className="text-[10px] text-white/40 font-medium">TIMELINE</span></div>
+          <div className="flex items-center gap-2"><Film className="w-3.5 h-3.5 text-white/30" /><span className="text-[10px] text-white/40 font-medium">{t('timeline.title')}</span></div>
           <div className="ml-auto flex items-center gap-2 text-[10px] text-white/30">
             <button onClick={() => setZoom(z => Math.max(50, z - 25))} className="hover:text-white/50">−</button>
             <span>{zoom}%</span>

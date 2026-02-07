@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { useApp } from '@/lib/context'
+import { useI18n } from '@/lib/i18n'
 import { SHORTS, GENRES, CREATORS } from '@/lib/data'
 import { VideoCard } from './shared'
 import type { Short } from '@/lib/types'
@@ -18,6 +19,7 @@ import type { Short } from '@/lib/types'
 // ─── Home Feed ───────────────────────────────────────
 export function HomeFeed() {
   const { handleWatch } = useApp()
+  const { t, lang } = useI18n()
   const [genre, setGenre] = useState('All')
   const [heroIdx, setHeroIdx] = useState(0)
   const heroShorts = SHORTS.filter(s => s.isHot)
@@ -40,14 +42,14 @@ export function HomeFeed() {
           <div className="absolute inset-0 bg-gradient-to-t from-[#08080f] via-transparent to-transparent" />
           <div className="absolute bottom-0 left-0 p-6 transition-all duration-500" key={hero.id}>
             <div className="flex items-center gap-2 mb-2">
-              <Badge className="bg-[#ff2d78]/20 text-[#ff2d78] border-[#ff2d78]/30 text-[10px]"><Flame className="w-3 h-3 mr-1" />TRENDING NOW</Badge>
+              <Badge className="bg-[#ff2d78]/20 text-[#ff2d78] border-[#ff2d78]/30 text-[10px]"><Flame className="w-3 h-3 mr-1" />{t('home.trendingNow')}</Badge>
               <Badge className="bg-white/10 text-white/50 border-0 text-[10px]">{hero.genre}</Badge>
             </div>
             <h1 className="text-2xl font-black mb-1 animate-fade-in-up" style={{ fontFamily: 'Outfit' }}>{hero.title}</h1>
-            <p className="text-xs text-white/40 mb-3">{hero.titleJP} — by {hero.creator}</p>
+            <p className="text-xs text-white/40 mb-3">{lang === 'ja' ? hero.title : hero.titleJP} — {t('common.by')} {hero.creator}</p>
             <div className="flex gap-2">
               <Button size="sm" className="h-8 px-4 text-xs font-semibold bg-[#ff2d78] hover:bg-[#ff2d78]/80 border-0 gap-1.5">
-                <Play className="w-3.5 h-3.5" fill="currentColor" />Watch Now
+                <Play className="w-3.5 h-3.5" fill="currentColor" />{t('home.watchNow')}
               </Button>
               <Button size="sm" variant="outline" className="h-8 px-4 text-xs border-white/10 text-white/60 hover:bg-white/5 gap-1.5">
                 <Plus className="w-3.5 h-3.5" />Library
@@ -81,9 +83,9 @@ export function HomeFeed() {
 
         {/* Sections */}
         {[
-          { label: 'Trending 人気', icon: TrendingUp, color: '#ff2d78', items: filtered.slice(0, 4), size: 'lg' as const },
-          { label: 'New Releases 新着', icon: Zap, color: '#00d4ff', items: filtered.slice(4, 8), size: 'md' as const },
-          { label: 'Continue Watching 続き', icon: Clock, color: '#a855f7', items: filtered.slice(8, 12), size: 'md' as const },
+          { label: t('home.trending'), icon: TrendingUp, color: '#ff2d78', items: filtered.slice(0, 4), size: 'lg' as const },
+          { label: t('home.newReleases'), icon: Zap, color: '#00d4ff', items: filtered.slice(4, 8), size: 'md' as const },
+          { label: t('home.continueWatching'), icon: Clock, color: '#a855f7', items: filtered.slice(8, 12), size: 'md' as const },
         ].map(section => section.items.length > 0 && (
           <div key={section.label} className="mb-8">
             <div className="flex items-center justify-between mb-4">
@@ -92,7 +94,7 @@ export function HomeFeed() {
                 <h2 className="text-lg font-bold" style={{ fontFamily: 'Outfit' }}>{section.label}</h2>
                 <Badge className="bg-white/5 text-white/30 border-0 text-[9px]">{section.items.length}</Badge>
               </div>
-              <button className="text-xs text-white/40 hover:text-white/60 flex items-center gap-1">View All <ChevronRight className="w-3 h-3" /></button>
+              <button className="text-xs text-white/40 hover:text-white/60 flex items-center gap-1">{t('home.viewAll')} <ChevronRight className="w-3 h-3" /></button>
             </div>
             <div className="grid grid-cols-4 gap-3 stagger-children">
               {section.items.map(s => <VideoCard key={s.id} short={s} size={section.size} />)}
@@ -107,6 +109,7 @@ export function HomeFeed() {
 // ─── Discover ────────────────────────────────────────
 export function Discover() {
   const { followedCreators, toggleFollow, addToast, handleWatch } = useApp()
+  const { t, lang } = useI18n()
   const [activeGenre, setActiveGenre] = useState<string | null>(null)
   const genreShorts = activeGenre ? SHORTS.filter(s => s.genre === activeGenre) : []
 
@@ -122,8 +125,8 @@ export function Discover() {
     <ScrollArea className="h-full">
       <div className="p-6 pb-24">
         <div className="mb-6">
-          <h1 className="text-2xl font-black mb-1 niji-gradient-text" style={{ fontFamily: 'Outfit' }}>Discover 探索</h1>
-          <p className="text-sm text-white/40">Find your next favorite 漫剧</p>
+          <h1 className="text-2xl font-black mb-1 niji-gradient-text" style={{ fontFamily: 'Outfit' }}>{t('discover.title')}</h1>
+          <p className="text-sm text-white/40">{t('discover.subtitle')}</p>
         </div>
 
         {/* Genre Cards - clickable */}
@@ -135,8 +138,8 @@ export function Discover() {
               <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, ${g.color}${activeGenre === g.name ? '25' : '12'}, ${g.color}05)` }} />
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 group-hover:scale-105 transition-transform">
                 <g.icon className="w-5 h-5" style={{ color: g.color }} />
-                <span className="text-xs font-semibold text-white/80">{g.name} {g.nameJP}</span>
-                <span className="text-[9px] text-white/30">{g.count} shorts</span>
+                <span className="text-xs font-semibold text-white/80">{lang === 'ja' ? g.nameJP : g.name}</span>
+                <span className="text-[9px] text-white/30">{g.count} {t('discover.shorts')}</span>
               </div>
             </div>
           ))}
@@ -147,7 +150,7 @@ export function Discover() {
           <div className="mb-8 animate-fade-in-up">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-bold" style={{ fontFamily: 'Outfit' }}>{activeGenre} Shorts</h2>
-              <button onClick={() => setActiveGenre(null)} className="text-xs text-white/40 hover:text-white/60">Clear filter</button>
+              <button onClick={() => setActiveGenre(null)} className="text-xs text-white/40 hover:text-white/60">{t('discover.clearFilter')}</button>
             </div>
             <div className="grid grid-cols-4 gap-3 stagger-children">
               {genreShorts.map(s => <VideoCard key={s.id} short={s} size="md" />)}
@@ -159,7 +162,7 @@ export function Discover() {
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-4">
             <Crown className="w-4 h-4 text-[#ffd600]" />
-            <h2 className="text-lg font-bold" style={{ fontFamily: 'Outfit' }}>Top Creators トップクリエイター</h2>
+            <h2 className="text-lg font-bold" style={{ fontFamily: 'Outfit' }}>{t('discover.topCreators')}</h2>
           </div>
           <div className="flex gap-3 stagger-children">
             {CREATORS.map((c, i) => {
@@ -198,7 +201,7 @@ export function Discover() {
           <div>
             <div className="flex items-center gap-2 mb-4">
               <Award className="w-4 h-4 text-[#00ffaa]" />
-              <h2 className="text-lg font-bold" style={{ fontFamily: 'Outfit' }}>Editor's Picks 編集者のおすすめ</h2>
+              <h2 className="text-lg font-bold" style={{ fontFamily: 'Outfit' }}>{t('discover.editorsPicks')}</h2>
             </div>
             <div className="grid grid-cols-3 gap-3 stagger-children">
               {SHORTS.slice(2, 8).map(s => <VideoCard key={s.id} short={s} size="lg" />)}
@@ -214,6 +217,7 @@ export function Discover() {
 export function Player() {
   const { watchingShort: short, handleBack, likedShorts, toggleLike, savedShorts, toggleSave,
     comments, addComment, toggleCommentLike, addToast, setShareModalOpen, followedCreators, toggleFollow } = useApp()
+  const { t, lang } = useI18n()
   const [playing, setPlaying] = useState(true)
   const [progress, setProgress] = useState(0)
   const [volume, setVolume] = useState(75)
@@ -276,7 +280,7 @@ export function Player() {
             </button>
           </div>
           <div className="absolute bottom-20 left-6">
-            <p className="text-xs text-white/30 mb-1">{short.titleJP}</p>
+            <p className="text-xs text-white/30 mb-1">{lang === 'ja' ? short.title : short.titleJP}</p>
             <h2 className="text-xl font-black" style={{ fontFamily: 'Outfit' }}>{short.title}</h2>
           </div>
 
@@ -324,21 +328,21 @@ export function Player() {
             </div>
             <Button size="sm" onClick={() => { toggleFollow(short.creator); addToast(creatorFollowed ? `Unfollowed ${short.creator}` : `Following ${short.creator}!`, creatorFollowed ? 'info' : 'success') }}
               className={`h-7 px-3 text-[10px] border-0 ${creatorFollowed ? 'bg-white/10 text-white/60' : 'bg-[#ff2d78] hover:bg-[#ff2d78]/80'}`}>
-              {creatorFollowed ? 'Following' : 'Follow'}
+              {creatorFollowed ? t('player.following') : t('player.follow')}
             </Button>
           </div>
           <div className="flex gap-2">
             <button onClick={() => { toggleLike(short.id); if (!liked) addToast('Liked!', 'success', '❤️') }}
               className={`flex-1 h-9 rounded-lg flex items-center justify-center gap-1.5 text-xs font-medium transition-all ${liked ? 'bg-[#ff2d78]/20 text-[#ff2d78]' : 'bg-white/5 text-white/50 hover:bg-white/8'}`}>
-              <Heart className="w-3.5 h-3.5" fill={liked ? 'currentColor' : 'none'} />{liked ? 'Liked' : 'Like'}
+              <Heart className="w-3.5 h-3.5" fill={liked ? 'currentColor' : 'none'} />{liked ? t('player.liked') : t('player.like')}
             </button>
             <button onClick={() => setShareModalOpen(true)}
               className="flex-1 h-9 rounded-lg flex items-center justify-center gap-1.5 text-xs font-medium bg-white/5 text-white/50 hover:bg-white/8 transition-all">
-              <Share2 className="w-3.5 h-3.5" />Share
+              <Share2 className="w-3.5 h-3.5" />{t('player.share')}
             </button>
             <button onClick={() => { toggleSave(short.id); addToast(saved ? 'Removed from Library' : 'Saved!', saved ? 'info' : 'success', saved ? '📂' : '🔖') }}
               className={`flex-1 h-9 rounded-lg flex items-center justify-center gap-1.5 text-xs font-medium transition-all ${saved ? 'bg-[#ffd600]/20 text-[#ffd600]' : 'bg-white/5 text-white/50 hover:bg-white/8'}`}>
-              <Bookmark className="w-3.5 h-3.5" fill={saved ? 'currentColor' : 'none'} />{saved ? 'Saved' : 'Save'}
+              <Bookmark className="w-3.5 h-3.5" fill={saved ? 'currentColor' : 'none'} />{saved ? t('player.saved') : t('player.save')}
             </button>
           </div>
         </div>
@@ -347,7 +351,7 @@ export function Player() {
           <ScrollArea className="h-full">
             <div className="p-4">
               <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
-                <MessageCircle className="w-4 h-4 text-white/40" />Comments <span className="text-white/30">· {comments.length}</span>
+                <MessageCircle className="w-4 h-4 text-white/40" />{t('player.comments')} <span className="text-white/30">· {comments.length}</span>
               </h3>
               {comments.map(c => (
                 <div key={c.id} className="mb-4">
@@ -362,7 +366,7 @@ export function Player() {
                       className={`text-[10px] flex items-center gap-1 transition-all ${c.liked ? 'text-[#ff2d78]' : 'text-white/30 hover:text-white/50'}`}>
                       <Heart className="w-3 h-3" fill={c.liked ? 'currentColor' : 'none'} />{c.likes}
                     </button>
-                    <button className="text-[10px] text-white/30 hover:text-white/50">Reply</button>
+                    <button className="text-[10px] text-white/30 hover:text-white/50">{t('player.reply')}</button>
                   </div>
                 </div>
               ))}
@@ -374,7 +378,7 @@ export function Player() {
           <div className="flex gap-2">
             <Input value={commentText} onChange={e => setCommentText(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && handleComment()}
-              placeholder="Add a comment..." className="h-9 bg-white/5 border-white/5 text-xs placeholder:text-white/20" />
+              placeholder={t('player.addComment')} className="h-9 bg-white/5 border-white/5 text-xs placeholder:text-white/20" />
             <Button onClick={handleComment} disabled={!commentText.trim()} size="sm" className="h-9 w-9 p-0 bg-[#ff2d78] hover:bg-[#ff2d78]/80 border-0 disabled:opacity-30">
               <Send className="w-3.5 h-3.5" />
             </Button>
@@ -388,6 +392,7 @@ export function Player() {
 // ─── Library ─────────────────────────────────────────
 export function Library() {
   const { likedShorts, savedShorts, watchHistory } = useApp()
+  const { t } = useI18n()
   const [tab, setTab] = useState<'saved' | 'liked' | 'history'>('saved')
 
   const savedItems = SHORTS.filter(s => savedShorts.has(s.id))
@@ -398,8 +403,8 @@ export function Library() {
   return (
     <ScrollArea className="h-full">
       <div className="p-6 pb-24">
-        <h1 className="text-2xl font-black mb-1 niji-gradient-text" style={{ fontFamily: 'Outfit' }}>Library ライブラリ</h1>
-        <p className="text-sm text-white/40 mb-5">Your saved and liked content</p>
+        <h1 className="text-2xl font-black mb-1 niji-gradient-text" style={{ fontFamily: 'Outfit' }}>{t('library.title')}</h1>
+        <p className="text-sm text-white/40 mb-5">{t('library.subtitle')}</p>
         <div className="flex gap-2 mb-6">
           {([['saved', 'Saved', savedItems.length], ['liked', 'Liked', likedItems.length], ['history', 'History', historyItems.length]] as const).map(([id, label, count]) => (
             <button key={id} onClick={() => setTab(id)}
@@ -429,6 +434,7 @@ export function Library() {
 // ─── Profile ─────────────────────────────────────────
 export function ProfileView() {
   const { followedCreators, likedShorts, savedShorts, projects, watchHistory } = useApp()
+  const { t } = useI18n()
   return (
     <ScrollArea className="h-full">
       <div className="p-6 pb-24">
@@ -447,7 +453,7 @@ export function ProfileView() {
         </div>
         {watchHistory.length > 0 && (
           <div>
-            <h2 className="text-sm font-semibold text-white/60 mb-3">Recently Watched</h2>
+            <h2 className="text-sm font-semibold text-white/60 mb-3">{t('profile.recentlyWatched')}</h2>
             <div className="grid grid-cols-4 gap-3 stagger-children">
               {watchHistory.slice(0, 4).map(id => { const s = SHORTS.find(sh => sh.id === id); return s ? <VideoCard key={s.id} short={s} /> : null })}
             </div>
@@ -456,7 +462,7 @@ export function ProfileView() {
         {watchHistory.length === 0 && (
           <div className="text-center py-16">
             <User className="w-10 h-10 text-white/10 mx-auto mb-3" />
-            <p className="text-sm text-white/30">Start watching to build your profile!</p>
+            <p className="text-sm text-white/30">{t('profile.startWatching')}</p>
           </div>
         )}
       </div>

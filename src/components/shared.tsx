@@ -3,7 +3,7 @@ import {
   Home, Compass, Play, Bookmark, User, Sparkles, Wand2, Users2,
   Film, Settings, Heart, Eye, Search, Bell, Plus, X, Check,
   Clapperboard, Flame, Copy, Link, Twitter, MessageCircle,
-  ChevronDown
+  ChevronDown, Globe
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { useApp } from '@/lib/context'
+import { useI18n } from '@/lib/i18n'
 import { SHORTS } from '@/lib/data'
 import type { View, Mode, Short, Toast as ToastType } from '@/lib/types'
 
@@ -39,6 +40,7 @@ export function ToastContainer() {
 // ─── Share Modal ─────────────────────────────────────
 export function ShareModal() {
   const { shareModalOpen, setShareModalOpen, watchingShort, addToast } = useApp()
+  const { t } = useI18n()
   const [copied, setCopied] = useState(false)
   if (!shareModalOpen) return null
 
@@ -46,7 +48,7 @@ export function ShareModal() {
   const handleCopy = () => {
     navigator.clipboard?.writeText(url).catch(() => {})
     setCopied(true)
-    addToast('Link copied to clipboard!', 'success', '📋')
+    addToast(t('share.copied'), 'success', '📋')
     setTimeout(() => setCopied(false), 2000)
   }
 
@@ -55,7 +57,7 @@ export function ShareModal() {
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShareModalOpen(false)} />
       <div className="relative w-[400px] rounded-2xl glass-strong p-6 animate-fade-in-up">
         <div className="flex items-center justify-between mb-5">
-          <h3 className="text-lg font-bold" style={{ fontFamily: 'Outfit' }}>Share 共有</h3>
+          <h3 className="text-lg font-bold" style={{ fontFamily: 'Outfit' }}>{t('share.title')}</h3>
           <button onClick={() => setShareModalOpen(false)} className="w-8 h-8 rounded-lg hover:bg-white/5 flex items-center justify-center text-white/40"><X className="w-4 h-4" /></button>
         </div>
         <div className="flex gap-3 mb-5">
@@ -87,6 +89,7 @@ export function ShareModal() {
 // ─── New Project Modal ───────────────────────────────
 export function NewProjectModal() {
   const { newProjectModalOpen, setNewProjectModalOpen, addProject, addToast, setView } = useApp()
+  const { t } = useI18n()
   const [name, setName] = useState('')
   const [template, setTemplate] = useState('blank')
   if (!newProjectModalOpen) return null
@@ -110,16 +113,16 @@ export function NewProjectModal() {
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setNewProjectModalOpen(false)} />
       <div className="relative w-[480px] rounded-2xl glass-strong p-6 animate-fade-in-up">
         <div className="flex items-center justify-between mb-5">
-          <h3 className="text-lg font-bold" style={{ fontFamily: 'Outfit' }}>New Project 新規プロジェクト</h3>
+          <h3 className="text-lg font-bold" style={{ fontFamily: 'Outfit' }}>{t('newProject.title')}</h3>
           <button onClick={() => setNewProjectModalOpen(false)} className="w-8 h-8 rounded-lg hover:bg-white/5 flex items-center justify-center text-white/40"><X className="w-4 h-4" /></button>
         </div>
         <div className="space-y-4">
           <div>
-            <label className="text-[10px] text-white/40 font-medium mb-1.5 block">PROJECT NAME</label>
+            <label className="text-[10px] text-white/40 font-medium mb-1.5 block">{t('newProject.nameLabel')}</label>
             <Input value={name} onChange={e => setName(e.target.value)} placeholder="My Amazing Animation..." className="h-10 bg-white/5 border-white/5 text-sm placeholder:text-white/20" autoFocus />
           </div>
           <div>
-            <label className="text-[10px] text-white/40 font-medium mb-2 block">TEMPLATE テンプレート</label>
+            <label className="text-[10px] text-white/40 font-medium mb-2 block">{t('newProject.template')}</label>
             <div className="grid grid-cols-3 gap-2">
               {[
                 { id: 'blank', label: 'Blank', desc: 'Start from scratch', color: '#a855f7' },
@@ -136,7 +139,7 @@ export function NewProjectModal() {
             </div>
           </div>
           <Button onClick={handleCreate} disabled={!name.trim()} className="w-full h-10 text-sm font-semibold bg-gradient-to-r from-[#ff2d78] to-[#a855f7] hover:opacity-90 border-0 gap-2 disabled:opacity-30">
-            <Plus className="w-4 h-4" />Create Project
+            <Plus className="w-4 h-4" />{t('newProject.create')}
           </Button>
         </div>
       </div>
@@ -147,6 +150,7 @@ export function NewProjectModal() {
 // ─── Video Card ──────────────────────────────────────
 export function VideoCard({ short, size = 'md' }: { short: Short; size?: 'sm' | 'md' | 'lg' }) {
   const { handleWatch, likedShorts, toggleLike, savedShorts, toggleSave, addToast } = useApp()
+  const { lang } = useI18n()
   const [hovered, setHovered] = useState(false)
   const h = size === 'lg' ? 'h-[280px]' : size === 'md' ? 'h-[200px]' : 'h-[160px]'
   const isLiked = likedShorts.has(short.id)
@@ -162,6 +166,9 @@ export function VideoCard({ short, size = 'md' }: { short: Short; size?: 'sm' | 
     toggleSave(short.id)
     addToast(isSaved ? 'Removed from Library' : 'Saved to Library', isSaved ? 'info' : 'success', isSaved ? '📂' : '🔖')
   }
+
+  const displayTitle = lang === 'ja' ? short.titleJP : short.title
+  const subtitle = lang === 'ja' ? short.title : short.titleJP
 
   return (
     <div
@@ -204,8 +211,8 @@ export function VideoCard({ short, size = 'md' }: { short: Short; size?: 'sm' | 
         )}
 
         <div className="absolute bottom-0 left-0 right-0 p-3">
-          <p className="text-[10px] text-white/40 font-medium mb-0.5">{short.titleJP}</p>
-          <h3 className="text-sm font-bold text-white leading-tight mb-1.5">{short.title}</h3>
+          <p className="text-[10px] text-white/40 font-medium mb-0.5">{subtitle}</p>
+          <h3 className="text-sm font-bold text-white leading-tight mb-1.5">{displayTitle}</h3>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5">
               <div className="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold text-white" style={{ background: `linear-gradient(135deg, ${short.color1}, ${short.color2})` }}>{short.avatar}</div>
@@ -227,17 +234,19 @@ export function VideoCard({ short, size = 'md' }: { short: Short; size?: 'sm' | 
 // ─── Sidebar ─────────────────────────────────────────
 export function Sidebar() {
   const { view, setView, mode, setMode } = useApp()
+  const { t, lang, setLang } = useI18n()
+
   const watchItems = [
-    { id: 'home' as View, icon: Home, label: 'Home', labelJP: 'ホーム' },
-    { id: 'discover' as View, icon: Compass, label: 'Discover', labelJP: '探索' },
-    { id: 'library' as View, icon: Bookmark, label: 'Library', labelJP: 'ライブラリ' },
-    { id: 'profile' as View, icon: User, label: 'Profile', labelJP: 'プロフィール' },
+    { id: 'home' as View, icon: Home, label: t('nav.home') },
+    { id: 'discover' as View, icon: Compass, label: t('nav.discover') },
+    { id: 'library' as View, icon: Bookmark, label: t('nav.library') },
+    { id: 'profile' as View, icon: User, label: t('nav.profile') },
   ]
   const createItems = [
-    { id: 'studio' as View, icon: Clapperboard, label: 'Studio', labelJP: 'スタジオ' },
-    { id: 'ai-gen' as View, icon: Sparkles, label: 'AI Generate', labelJP: 'AI生成' },
-    { id: 'char-lab' as View, icon: Users2, label: 'Characters', labelJP: 'キャラクター' },
-    { id: 'timeline' as View, icon: Film, label: 'Timeline', labelJP: 'タイムライン' },
+    { id: 'studio' as View, icon: Clapperboard, label: t('nav.studio') },
+    { id: 'ai-gen' as View, icon: Sparkles, label: t('nav.aiGen') },
+    { id: 'char-lab' as View, icon: Users2, label: t('nav.characters') },
+    { id: 'timeline' as View, icon: Film, label: t('nav.timeline') },
   ]
   const items = mode === 'watch' ? watchItems : createItems
 
@@ -247,7 +256,7 @@ export function Sidebar() {
         <div className="relative w-10 h-10 cursor-pointer" onClick={() => { setMode('watch'); setView('home') }}>
           <div className="absolute inset-0 rounded-xl niji-gradient animate-spin-slow opacity-80" />
           <div className="absolute inset-[2px] rounded-[10px] bg-[#08080f] flex items-center justify-center">
-            <span className="text-sm font-black niji-gradient-text">虹</span>
+            <span className="text-sm font-black niji-gradient-text">{t('logo')}</span>
           </div>
         </div>
       </div>
@@ -274,7 +283,7 @@ export function Sidebar() {
                       ${active ? mode === 'watch' ? 'bg-[#ff2d78]/15 text-[#ff2d78]' : 'bg-[#00d4ff]/15 text-[#00d4ff]'
                         : 'text-white/30 hover:text-white/60 hover:bg-white/5'}`}>
                     <item.icon className="w-4 h-4" strokeWidth={active ? 2.5 : 2} />
-                    <span className="text-[8px] font-medium leading-none">{item.labelJP}</span>
+                    <span className="text-[8px] font-medium leading-none">{item.label}</span>
                   </button>
                 </TooltipTrigger>
                 <TooltipContent side="right" className="bg-[#1a1a2e] border-white/10 text-xs">{item.label}</TooltipContent>
@@ -283,6 +292,12 @@ export function Sidebar() {
           )
         })}
       </div>
+      {/* Language Switcher */}
+      <button onClick={() => setLang(lang === 'en' ? 'ja' : 'en')}
+        className="w-11 h-11 rounded-xl flex flex-col items-center justify-center gap-0.5 text-white/30 hover:text-white/60 hover:bg-white/5 transition-all mb-0.5">
+        <Globe className="w-4 h-4" />
+        <span className="text-[8px] font-medium leading-none">{lang === 'en' ? 'EN' : 'JA'}</span>
+      </button>
       <button className="w-11 h-11 rounded-xl flex items-center justify-center text-white/30 hover:text-white/60 hover:bg-white/5 transition-all">
         <Settings className="w-4 h-4" />
       </button>
@@ -293,6 +308,7 @@ export function Sidebar() {
 // ─── Top Bar ─────────────────────────────────────────
 export function TopBar() {
   const { mode, searchQuery, setSearchQuery, searchOpen, setSearchOpen, setNewProjectModalOpen } = useApp()
+  const { t } = useI18n()
   const filteredShorts = searchQuery.length > 1 ? SHORTS.filter(s =>
     s.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     s.titleJP.includes(searchQuery) ||
@@ -309,7 +325,7 @@ export function TopBar() {
             onChange={e => { setSearchQuery(e.target.value); setSearchOpen(true) }}
             onFocus={() => searchQuery && setSearchOpen(true)}
             onBlur={() => setTimeout(() => setSearchOpen(false), 200)}
-            placeholder={mode === 'watch' ? '漫剧を検索... Search shorts...' : 'Search projects...'}
+            placeholder={mode === 'watch' ? t('search.shorts') : t('search.projects')}
             className="bg-white/5 border-white/5 pl-9 pr-8 h-9 text-sm placeholder:text-white/25 focus:border-white/15 focus:ring-0" />
           {searchQuery && (
             <button onClick={() => { setSearchQuery(''); setSearchOpen(false) }} className="absolute right-2 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60"><X className="w-3.5 h-3.5" /></button>
@@ -323,7 +339,7 @@ export function TopBar() {
           )}
           {searchOpen && searchQuery.length > 1 && filteredShorts.length === 0 && (
             <div className="absolute top-full left-0 right-0 mt-1 rounded-xl glass-strong border border-white/10 p-4 text-center z-50">
-              <p className="text-xs text-white/40">No results found for "{searchQuery}"</p>
+              <p className="text-xs text-white/40">{t('search.noResults')} "{searchQuery}"</p>
             </div>
           )}
         </div>
@@ -331,7 +347,7 @@ export function TopBar() {
       <div className="flex items-center gap-2">
         {mode === 'create' && (
           <Button onClick={() => setNewProjectModalOpen(true)} size="sm" className="h-8 px-3 text-xs font-semibold bg-gradient-to-r from-[#ff2d78] to-[#a855f7] hover:opacity-90 border-0 gap-1.5">
-            <Plus className="w-3.5 h-3.5" />New Project
+            <Plus className="w-3.5 h-3.5" />{t('common.newProject')}
           </Button>
         )}
         <button className="w-9 h-9 rounded-xl flex items-center justify-center text-white/40 hover:text-white/70 hover:bg-white/5 transition-all relative">

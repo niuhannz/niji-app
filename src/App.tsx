@@ -1,4 +1,5 @@
 import { AppProvider, useApp } from '@/lib/context'
+import { I18nProvider } from '@/lib/i18n'
 import { ToastContainer, ShareModal, NewProjectModal, Sidebar, TopBar } from '@/components/shared'
 import { HomeFeed, Discover, Player, Library, ProfileView } from '@/components/consumer'
 import { StudioDashboard, AIGenerator, CharacterLab, TimelineEditor } from '@/components/studio'
@@ -40,10 +41,12 @@ function AppContent() {
 
 export default function App() {
   return (
-    <TooltipProvider delayDuration={200}>
-      <AppProvider>
-        <AppContent />
-      </AppProvider>
-    </TooltipProvider>
+    <I18nProvider>
+      <TooltipProvider delayDuration={200}>
+        <AppProvider>
+          <AppContent />
+        </AppProvider>
+      </TooltipProvider>
+    </I18nProvider>
   )
 }
