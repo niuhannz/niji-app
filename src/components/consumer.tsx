@@ -1,9 +1,10 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   Play, Bookmark, Heart, Eye, ChevronRight, Zap, Clock, TrendingUp,
   Star, Crown, Flame, Trophy, Award, Globe, Sparkles, Share2,
   MessageCircle, Send, ChevronLeft, SkipBack, SkipForward, Pause,
-  Volume2, VolumeX, Maximize, Plus, User
+  Volume2, VolumeX, Maximize, Plus, User, BookOpen
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -13,7 +14,8 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { useApp } from '@/lib/context'
 import { useI18n } from '@/lib/i18n'
 import { SHORTS, GENRES, CREATORS } from '@/lib/data'
-import { VideoCard } from './shared'
+import { VideoCard, MangaCard } from './shared'
+import { MANGA_SERIES } from '@/lib/mock-data'
 import type { Short } from '@/lib/types'
 
 // ─── Home Feed ───────────────────────────────────────
@@ -105,6 +107,21 @@ export function HomeFeed() {
             </div>
           </div>
         ))}
+
+        {/* Manga Section */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <BookOpen className="w-4 h-4 text-[#00ffaa]" />
+              <h2 className="text-lg font-bold" style={{ fontFamily: 'Outfit' }}>Popular Manga</h2>
+              <Badge className="bg-white/5 text-white/30 border-0 text-[9px]">{MANGA_SERIES.length}</Badge>
+            </div>
+            <button className="text-xs text-white/40 hover:text-white/60 flex items-center gap-1">{t('home.viewAll')} <ChevronRight className="w-3 h-3" /></button>
+          </div>
+          <div className="grid grid-cols-4 gap-3 stagger-children">
+            {MANGA_SERIES.map(m => <MangaCard key={m.id} manga={m} />)}
+          </div>
+        </div>
       </div>
     </ScrollArea>
   )

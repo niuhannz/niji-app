@@ -1,9 +1,11 @@
 import { useState, useRef } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { useNavigate } from 'react-router-dom'
 import {
   Home, Compass, Play, Bookmark, User, Sparkles, Wand2, Users2,
   Film, Settings, Heart, Eye, Search, Bell, Plus, X, Check,
   Clapperboard, Flame, Copy, Link, Twitter, MessageCircle,
-  ChevronDown, Globe
+  ChevronDown, Globe, BookOpen, Crown
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -147,7 +149,7 @@ export function NewProjectModal() {
   )
 }
 
-// ─── Video Card ──────────────────────────────────────
+// ─── Video Card with Framer Motion ──────────────────────
 export function VideoCard({ short, size = 'md' }: { short: Short; size?: 'sm' | 'md' | 'lg' }) {
   const { handleWatch, likedShorts, toggleLike, savedShorts, toggleSave, addToast } = useApp()
   const { lang } = useI18n()
@@ -171,10 +173,15 @@ export function VideoCard({ short, size = 'md' }: { short: Short; size?: 'sm' | 
   const subtitle = lang === 'ja' ? short.title : short.titleJP
 
   return (
-    <div
-      className={`group relative rounded-xl overflow-hidden cursor-pointer transition-all duration-300 ${hovered ? 'scale-[1.02] z-10' : ''}`}
-      onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}
+    <motion.div
+      className="group relative rounded-xl overflow-hidden cursor-pointer"
+      whileHover={{ scale: 1.03, y: -4 }}
+      whileTap={{ scale: 0.98 }}
+      transition={{ type: 'spring', damping: 20, stiffness: 300 }}
+      onHoverStart={() => setHovered(true)}
+      onHoverEnd={() => setHovered(false)}
       onClick={() => handleWatch(short)}
+      layout
     >
       <div className={`${h} relative`} style={{ background: short.thumbnail ? '#000' : `linear-gradient(135deg, ${short.color1}22, ${short.color2}22)` }}>
         {short.thumbnail ? (
@@ -183,31 +190,63 @@ export function VideoCard({ short, size = 'md' }: { short: Short; size?: 'sm' | 
           <div className="absolute inset-0 opacity-40" style={{ background: `linear-gradient(135deg, ${short.color1}, ${short.color2})` }} />
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-          <div className="relative">
-            <div className="w-14 h-14 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center border border-white/20">
-              <Play className="w-7 h-7 text-white ml-0.5" fill="currentColor" />
-            </div>
-          </div>
-        </div>
+
+        {/* Animated play button on hover */}
+        <AnimatePresence>
+          {hovered && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.6 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.6 }}
+              transition={{ type: 'spring', damping: 15 }}
+              className="absolute inset-0 flex items-center justify-center z-10"
+            >
+              <div className="w-14 h-14 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center border border-white/20">
+                <Play className="w-7 h-7 text-white ml-0.5" fill="currentColor" />
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Badges */}
         <div className="absolute top-2.5 left-2.5 flex gap-1.5">
           {short.isHot && <Badge className="bg-[#ff2d78]/90 text-white border-0 text-[10px] px-1.5 py-0 font-semibold gap-1"><Flame className="w-2.5 h-2.5" />HOT</Badge>}
           {short.isNew && <Badge className="bg-[#00d4ff]/90 text-white border-0 text-[10px] px-1.5 py-0 font-semibold">NEW</Badge>}
+          {short.isPremium && <Badge className="bg-[#ffd600]/90 text-black border-0 text-[10px] px-1.5 py-0 font-semibold gap-1"><Crown className="w-2.5 h-2.5" />PRO</Badge>}
         </div>
 
-        {/* Hover actions */}
-        {hovered && (
-          <div className="absolute top-2.5 right-2.5 flex flex-col gap-1 animate-fade-in">
-            <button onClick={handleLike} className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all ${isLiked ? 'bg-[#ff2d78]/30 text-[#ff2d78]' : 'bg-black/40 text-white/60 hover:text-white'}`}>
-              <Heart className="w-3.5 h-3.5" fill={isLiked ? 'currentColor' : 'none'} />
-            </button>
-            <button onClick={handleSave} className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all ${isSaved ? 'bg-[#ffd600]/30 text-[#ffd600]' : 'bg-black/40 text-white/60 hover:text-white'}`}>
-              <Bookmark className="w-3.5 h-3.5" fill={isSaved ? 'currentColor' : 'none'} />
-            </button>
-          </div>
-        )}
+        {/* Hover actions with stagger animation */}
+        <AnimatePresence>
+          {hovered && (
+            <motion.div
+              initial="hidden"
+              animate="visible"
+              exit="hidden"
+              variants={{
+                visible: { transition: { staggerChildren: 0.05 } },
+                hidden: {},
+              }}
+              className="absolute top-2.5 right-2.5 flex flex-col gap-1"
+            >
+              <motion.button
+                variants={{ hidden: { opacity: 0, x: 10 }, visible: { opacity: 1, x: 0 } }}
+                onClick={handleLike}
+                whileTap={{ scale: 1.3 }}
+                className={`w-7 h-7 rounded-lg flex items-center justify-center transition-colors ${isLiked ? 'bg-[#ff2d78]/30 text-[#ff2d78]' : 'bg-black/40 text-white/60 hover:text-white'}`}
+              >
+                <Heart className="w-3.5 h-3.5" fill={isLiked ? 'currentColor' : 'none'} />
+              </motion.button>
+              <motion.button
+                variants={{ hidden: { opacity: 0, x: 10 }, visible: { opacity: 1, x: 0 } }}
+                onClick={handleSave}
+                whileTap={{ scale: 1.3 }}
+                className={`w-7 h-7 rounded-lg flex items-center justify-center transition-colors ${isSaved ? 'bg-[#ffd600]/30 text-[#ffd600]' : 'bg-black/40 text-white/60 hover:text-white'}`}
+              >
+                <Bookmark className="w-3.5 h-3.5" fill={isSaved ? 'currentColor' : 'none'} />
+              </motion.button>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {!hovered && (
           <div className="absolute top-2.5 right-2.5">
@@ -230,9 +269,66 @@ export function VideoCard({ short, size = 'md' }: { short: Short; size?: 'sm' | 
           </div>
         </div>
 
-        {hovered && <div className="absolute inset-0 pointer-events-none" style={{ boxShadow: `inset 0 0 30px ${short.color1}20, 0 0 40px ${short.color1}15` }} />}
+        {/* Glow effect on hover */}
+        <AnimatePresence>
+          {hovered && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 pointer-events-none"
+              style={{ boxShadow: `inset 0 0 30px ${short.color1}20, 0 0 40px ${short.color1}15` }}
+            />
+          )}
+        </AnimatePresence>
       </div>
-    </div>
+    </motion.div>
+  )
+}
+
+// ─── Manga Card ─────────────────────────────────────────
+export function MangaCard({ manga }: { manga: { id: string; title: string; titleJP: string; coverImage: string; creator: string; rating: number; status: string; genres: string[]; color1: string; color2: string; isPremium?: boolean } }) {
+  const navigate = useNavigate()
+
+  return (
+    <motion.div
+      className="group relative rounded-xl overflow-hidden cursor-pointer"
+      whileHover={{ scale: 1.03, y: -4 }}
+      whileTap={{ scale: 0.98 }}
+      transition={{ type: 'spring', damping: 20, stiffness: 300 }}
+      onClick={() => navigate(`/manga/${manga.id}`)}
+    >
+      <div className="h-[260px] relative" style={{ background: manga.coverImage ? '#000' : `linear-gradient(135deg, ${manga.color1}22, ${manga.color2}22)` }}>
+        {manga.coverImage ? (
+          <img src={manga.coverImage} alt={manga.title} className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+        ) : (
+          <div className="absolute inset-0 opacity-40" style={{ background: `linear-gradient(135deg, ${manga.color1}, ${manga.color2})` }} />
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+        <div className="absolute top-2.5 left-2.5 flex gap-1.5">
+          {manga.isPremium && <Badge className="bg-[#ffd600]/90 text-black border-0 text-[10px] px-1.5 py-0 font-semibold gap-1"><Crown className="w-2.5 h-2.5" />PRO</Badge>}
+        </div>
+        <AnimatePresence>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.6 }}
+            whileHover={{ opacity: 1, scale: 1 }}
+            className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10"
+          >
+            <div className="w-14 h-14 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center border border-white/20">
+              <BookOpen className="w-6 h-6 text-white" />
+            </div>
+          </motion.div>
+        </AnimatePresence>
+        <div className="absolute bottom-0 left-0 right-0 p-3">
+          <p className="text-[10px] text-white/40 font-medium mb-0.5">{manga.titleJP}</p>
+          <h3 className="text-sm font-bold text-white leading-tight mb-1">{manga.title}</h3>
+          <div className="flex items-center gap-2 text-[10px] text-white/40">
+            <span>{manga.creator}</span>
+            <span className="text-[#ffd600] flex items-center gap-0.5">★ {manga.rating}</span>
+          </div>
+        </div>
+      </div>
+    </motion.div>
   )
 }
 
