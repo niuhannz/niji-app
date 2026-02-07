@@ -4,7 +4,10 @@ import {
   Play, Bookmark, Heart, Eye, ChevronRight, Zap, Clock, TrendingUp,
   Star, Crown, Flame, Trophy, Award, Globe, Sparkles, Share2,
   MessageCircle, Send, ChevronLeft, SkipBack, SkipForward, Pause,
-  Volume2, VolumeX, Maximize, Plus, User, BookOpen
+  Volume2, VolumeX, Maximize, Plus, User, BookOpen,
+  Settings, Bell, Shield, Monitor, Languages, Film, Trash2,
+  ExternalLink, LogOut, ChevronDown, Mail, Calendar, CreditCard,
+  Palette, PlayCircle, BellRing, Info, FileText, Lock, Check
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -16,7 +19,9 @@ import { useI18n } from '@/lib/i18n'
 import { SHORTS, GENRES, CREATORS } from '@/lib/data'
 import { VideoCard, MangaCard } from './shared'
 import { MANGA_SERIES } from '@/lib/mock-data'
-import type { Short } from '@/lib/types'
+import { useAuthStore } from '@/stores/useAuthStore'
+import { useLibraryStore } from '@/stores/useLibraryStore'
+import type { Short, SubscriptionTier } from '@/lib/types'
 
 // ─── Home Feed ───────────────────────────────────────
 export function HomeFeed() {
@@ -504,38 +509,390 @@ export function Library() {
 
 // ─── Profile ─────────────────────────────────────────
 export function ProfileView() {
-  const { followedCreators, likedShorts, savedShorts, projects, watchHistory } = useApp()
+  const { followedCreators, likedShorts, savedShorts, projects, watchHistory, setView, addToast } = useApp()
   const { t } = useI18n()
+  const { user, openPremiumModal } = useAuthStore()
+  const [editingName, setEditingName] = useState(false)
+  const [nameValue, setNameValue] = useState(user?.name || 'Han')
+
+  const tierColor = user?.subscription === 'premium' ? '#ffd600' : user?.subscription === 'basic' ? '#00d4ff' : '#ffffff'
+  const tierLabel = user?.subscription === 'premium' ? t('profile.premium') : user?.subscription === 'basic' ? t('profile.basic') : t('profile.free')
+
+  const stats = [
+    { label: t('profile.liked'), value: likedShorts.size, color: '#ff2d78', icon: Heart },
+    { label: t('profile.saved'), value: savedShorts.size, color: '#ffd600', icon: Bookmark },
+    { label: t('profile.following'), value: followedCreators.size, color: '#a855f7', icon: User },
+    { label: t('profile.projects'), value: projects.length, color: '#00d4ff', icon: Film },
+    { label: t('profile.watched'), value: watchHistory.length, color: '#00ffaa', icon: Eye },
+  ]
+
   return (
     <ScrollArea className="h-full">
-      <div className="p-6 pb-24">
-        <div className="flex items-center gap-5 mb-8">
-          <div className="w-20 h-20 rounded-2xl niji-gradient flex items-center justify-center text-2xl font-black text-white">H</div>
-          <div>
-            <h1 className="text-2xl font-black" style={{ fontFamily: 'Outfit' }}>Han</h1>
-            <p className="text-sm text-white/40 mb-2">Creator & Viewer · Joined 2026</p>
-            <div className="flex gap-4 text-xs text-white/50">
-              <span><strong className="text-white">{followedCreators.size}</strong> following</span>
-              <span><strong className="text-white">{likedShorts.size}</strong> liked</span>
-              <span><strong className="text-white">{savedShorts.size}</strong> saved</span>
-              <span><strong className="text-white">{projects.length}</strong> projects</span>
+      <div className="p-6 pb-24 max-w-4xl mx-auto">
+        {/* Profile Header */}
+        <div className="rounded-2xl overflow-hidden mb-6">
+          {/* Banner */}
+          <div className="h-32 relative" style={{ background: 'linear-gradient(135deg, #ff2d7830, #a855f730, #00d4ff30)' }}>
+            <div className="absolute inset-0 backdrop-blur-3xl" />
+            <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-[#0a0a0f] to-transparent" />
+          </div>
+          <div className="px-6 pb-5 -mt-12 relative">
+            <div className="flex items-end gap-5 mb-4">
+              <div className="relative">
+                <div className="w-24 h-24 rounded-2xl niji-gradient flex items-center justify-center text-3xl font-black text-white ring-4 ring-[#0a0a0f]">
+                  {user?.name?.[0] || 'H'}
+                </div>
+                <div className="absolute -bottom-1 -right-1 w-7 h-7 rounded-lg flex items-center justify-center text-[9px] font-bold border-2 border-[#0a0a0f]"
+                  style={{ background: `${tierColor}20`, color: tierColor, borderColor: '#0a0a0f' }}>
+                  {user?.subscription === 'premium' ? <Crown className="w-3.5 h-3.5" /> : user?.subscription === 'basic' ? <Star className="w-3.5 h-3.5" /> : <User className="w-3.5 h-3.5" />}
+                </div>
+              </div>
+              <div className="flex-1 pb-1">
+                <div className="flex items-center gap-3">
+                  {editingName ? (
+                    <div className="flex items-center gap-2">
+                      <input
+                        value={nameValue}
+                        onChange={e => setNameValue(e.target.value)}
+                        className="bg-white/5 border border-white/10 rounded-lg px-3 py-1 text-xl font-black outline-none focus:border-[#ff2d78]/50"
+                        style={{ fontFamily: 'Outfit' }}
+                        autoFocus
+                        onKeyDown={e => { if (e.key === 'Enter') { setEditingName(false); addToast('Profile updated!', 'success', '✅') } }}
+                      />
+                      <button onClick={() => { setEditingName(false); addToast('Profile updated!', 'success', '✅') }}
+                        className="w-7 h-7 rounded-lg bg-[#00ffaa]/20 text-[#00ffaa] flex items-center justify-center hover:bg-[#00ffaa]/30">
+                        <Check className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ) : (
+                    <h1 className="text-2xl font-black cursor-pointer hover:text-white/80 transition-colors" style={{ fontFamily: 'Outfit' }}
+                      onClick={() => setEditingName(true)}>{nameValue}</h1>
+                  )}
+                  <Badge className="text-[9px] px-2 py-0 border-0 font-semibold" style={{ background: `${tierColor}20`, color: tierColor }}>
+                    {tierLabel}
+                  </Badge>
+                </div>
+                <div className="flex items-center gap-3 mt-1 text-xs text-white/40">
+                  <span className="flex items-center gap-1"><Mail className="w-3 h-3" />{user?.email || 'niuhan@gmail.com'}</span>
+                  <span className="flex items-center gap-1"><Calendar className="w-3 h-3" />{t('profile.memberSince')} {user?.joinedDate ? new Date(user.joinedDate).toLocaleDateString('en', { month: 'short', year: 'numeric' }) : 'Jan 2026'}</span>
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <Button size="sm" variant="outline" onClick={() => setEditingName(true)}
+                  className="h-8 px-3 text-xs border-white/10 text-white/50 hover:bg-white/5 gap-1.5">
+                  {t('profile.editProfile')}
+                </Button>
+                <Button size="sm" variant="outline" onClick={() => setView('settings')}
+                  className="h-8 px-3 text-xs border-white/10 text-white/50 hover:bg-white/5 gap-1.5">
+                  <Settings className="w-3 h-3" />
+                </Button>
+              </div>
             </div>
           </div>
         </div>
-        {watchHistory.length > 0 && (
-          <div>
-            <h2 className="text-sm font-semibold text-white/60 mb-3">{t('profile.recentlyWatched')}</h2>
-            <div className="grid grid-cols-4 gap-3 stagger-children">
-              {watchHistory.slice(0, 4).map(id => { const s = SHORTS.find(sh => sh.id === id); return s ? <VideoCard key={s.id} short={s} /> : null })}
+
+        {/* Stats Row */}
+        <div className="grid grid-cols-5 gap-3 mb-6">
+          {stats.map(s => (
+            <div key={s.label} className="rounded-xl p-3.5 text-center transition-all hover:scale-[1.02] cursor-default"
+              style={{ background: `${s.color}08`, border: `1px solid ${s.color}15` }}>
+              <s.icon className="w-4 h-4 mx-auto mb-1.5" style={{ color: s.color }} />
+              <p className="text-lg font-black" style={{ fontFamily: 'Outfit', color: s.color }}>{s.value}</p>
+              <p className="text-[10px] text-white/40 font-medium">{s.label}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Subscription Card */}
+        {user?.subscription === 'free' && (
+          <div className="rounded-2xl p-5 mb-6 relative overflow-hidden"
+            style={{ background: 'linear-gradient(135deg, #ff2d7815, #a855f715)', border: '1px solid #ff2d7825' }}>
+            <div className="absolute top-0 right-0 w-32 h-32 rounded-full opacity-10" style={{ background: 'radial-gradient(circle, #ff2d78, transparent)' }} />
+            <div className="relative flex items-center justify-between">
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <Crown className="w-4 h-4 text-[#ffd600]" />
+                  <h3 className="text-sm font-bold">{t('profile.upgrade')}</h3>
+                </div>
+                <p className="text-xs text-white/40 max-w-md">Unlock premium manga chapters, ad-free viewing, 4K quality, and early access to new releases.</p>
+              </div>
+              <Button size="sm" onClick={() => openPremiumModal()}
+                className="h-9 px-5 text-xs font-semibold bg-gradient-to-r from-[#ff2d78] to-[#a855f7] hover:opacity-90 border-0 gap-1.5 shrink-0">
+                <Crown className="w-3.5 h-3.5" />Upgrade
+              </Button>
             </div>
           </div>
         )}
-        {watchHistory.length === 0 && (
-          <div className="text-center py-16">
-            <User className="w-10 h-10 text-white/10 mx-auto mb-3" />
-            <p className="text-sm text-white/30">{t('profile.startWatching')}</p>
+
+        {/* Recently Watched */}
+        {watchHistory.length > 0 && (
+          <div className="mb-6">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <Clock className="w-4 h-4 text-[#a855f7]" />
+                <h2 className="text-sm font-bold">{t('profile.recentlyWatched')}</h2>
+                <Badge className="bg-white/5 text-white/30 border-0 text-[9px]">{watchHistory.length}</Badge>
+              </div>
+              <button onClick={() => setView('library')} className="text-xs text-white/40 hover:text-white/60 flex items-center gap-1">View All <ChevronRight className="w-3 h-3" /></button>
+            </div>
+            <div className="grid grid-cols-4 gap-3">
+              {watchHistory.slice(0, 8).map(id => { const s = SHORTS.find(sh => sh.id === id); return s ? <VideoCard key={s.id} short={s} size="sm" /> : null })}
+            </div>
           </div>
         )}
+
+        {/* Empty state */}
+        {watchHistory.length === 0 && (
+          <div className="text-center py-16 rounded-2xl" style={{ background: 'linear-gradient(135deg, #ffffff05, #ffffff02)' }}>
+            <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center mx-auto mb-4">
+              <Play className="w-7 h-7 text-white/15" />
+            </div>
+            <p className="text-sm text-white/40 mb-1">No watch history yet</p>
+            <p className="text-xs text-white/25 mb-4">{t('profile.startWatching')}</p>
+            <Button size="sm" onClick={() => setView('home')}
+              className="h-8 px-4 text-xs font-semibold bg-[#ff2d78] hover:bg-[#ff2d78]/80 border-0 gap-1.5">
+              <Play className="w-3 h-3" fill="currentColor" />Start Exploring
+            </Button>
+          </div>
+        )}
+      </div>
+    </ScrollArea>
+  )
+}
+
+// ─── Settings ───────────────────────────────────────
+function SettingsToggle({ enabled, onToggle, color = '#00ffaa' }: { enabled: boolean; onToggle: () => void; color?: string }) {
+  return (
+    <button onClick={onToggle}
+      className="w-10 h-5.5 rounded-full relative transition-all duration-200 shrink-0"
+      style={{ background: enabled ? `${color}30` : 'rgba(255,255,255,0.08)', border: `1px solid ${enabled ? `${color}40` : 'rgba(255,255,255,0.1)'}` }}>
+      <div className="absolute top-[2px] w-4 h-4 rounded-full transition-all duration-200"
+        style={{ left: enabled ? '21px' : '2px', background: enabled ? color : 'rgba(255,255,255,0.3)' }} />
+    </button>
+  )
+}
+
+function SettingsRow({ icon: Icon, label, desc, children, color = '#ffffff' }: {
+  icon: any; label: string; desc?: string; children: React.ReactNode; color?: string
+}) {
+  return (
+    <div className="flex items-center justify-between py-3.5">
+      <div className="flex items-center gap-3 flex-1 min-w-0">
+        <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: `${color}10` }}>
+          <Icon className="w-4 h-4" style={{ color }} />
+        </div>
+        <div className="min-w-0">
+          <p className="text-sm font-medium text-white/80">{label}</p>
+          {desc && <p className="text-[10px] text-white/30 mt-0.5">{desc}</p>}
+        </div>
+      </div>
+      <div className="ml-3 shrink-0">{children}</div>
+    </div>
+  )
+}
+
+export function SettingsView() {
+  const { setView, addToast } = useApp()
+  const { t, lang, setLang } = useI18n()
+  const { user, setSubscription, openPremiumModal, logout } = useAuthStore()
+
+  const [autoplay, setAutoplay] = useState(true)
+  const [skipIntro, setSkipIntro] = useState(false)
+  const [quality, setQuality] = useState('auto')
+  const [notifEpisodes, setNotifEpisodes] = useState(true)
+  const [notifRecs, setNotifRecs] = useState(true)
+  const [notifCreators, setNotifCreators] = useState(true)
+  const [reduceMotion, setReduceMotion] = useState(false)
+  const [confirmClear, setConfirmClear] = useState(false)
+
+  const tierColor = user?.subscription === 'premium' ? '#ffd600' : user?.subscription === 'basic' ? '#00d4ff' : '#ffffff'
+  const tierLabel = user?.subscription === 'premium' ? t('profile.premium') : user?.subscription === 'basic' ? t('profile.basic') : t('profile.free')
+
+  const handleClearHistory = () => {
+    if (!confirmClear) { setConfirmClear(true); return }
+    addToast('Watch history cleared', 'success', '🗑️')
+    setConfirmClear(false)
+  }
+
+  return (
+    <ScrollArea className="h-full">
+      <div className="p-6 pb-24 max-w-2xl mx-auto">
+        {/* Header */}
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center">
+            <Settings className="w-5 h-5 text-white/50" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-black" style={{ fontFamily: 'Outfit' }}>{t('settings.title')}</h1>
+            <p className="text-xs text-white/30">Customize your niji.app experience</p>
+          </div>
+        </div>
+
+        {/* Account Card */}
+        <div className="rounded-2xl p-4 mb-5 glass hover:bg-white/[0.03] transition-all cursor-pointer" onClick={() => setView('profile')}>
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-xl niji-gradient flex items-center justify-center text-lg font-bold text-white">
+              {user?.name?.[0] || 'H'}
+            </div>
+            <div className="flex-1">
+              <div className="flex items-center gap-2">
+                <p className="text-sm font-bold">{user?.name || 'Han'}</p>
+                <Badge className="text-[8px] px-1.5 py-0 border-0 font-semibold" style={{ background: `${tierColor}20`, color: tierColor }}>
+                  {tierLabel}
+                </Badge>
+              </div>
+              <p className="text-[10px] text-white/40">{user?.email || 'niuhan@gmail.com'}</p>
+            </div>
+            <ChevronRight className="w-4 h-4 text-white/20" />
+          </div>
+        </div>
+
+        {/* Appearance */}
+        <div className="mb-5">
+          <div className="flex items-center gap-2 mb-1 px-1">
+            <Palette className="w-3.5 h-3.5 text-[#a855f7]" />
+            <h2 className="text-xs font-bold text-white/40 uppercase tracking-wider">{t('settings.appearance')}</h2>
+          </div>
+          <div className="rounded-xl glass divide-y divide-white/5 px-4">
+            <SettingsRow icon={Monitor} label={t('settings.darkMode')} desc={t('settings.darkModeDesc')} color="#a855f7">
+              <SettingsToggle enabled={true} onToggle={() => addToast('Dark mode is always on!', 'info', '🌙')} color="#a855f7" />
+            </SettingsRow>
+            <SettingsRow icon={Sparkles} label={t('settings.reduceMotion')} desc={t('settings.reduceMotionDesc')} color="#a855f7">
+              <SettingsToggle enabled={reduceMotion} onToggle={() => { setReduceMotion(!reduceMotion); addToast(reduceMotion ? 'Animations enabled' : 'Animations reduced', 'success') }} color="#a855f7" />
+            </SettingsRow>
+            <SettingsRow icon={Languages} label={t('settings.language')} desc={t('settings.languageDesc')} color="#a855f7">
+              <div className="flex gap-1">
+                {(['en', 'ja'] as const).map(l => (
+                  <button key={l} onClick={() => setLang(l)}
+                    className={`px-3 py-1 rounded-lg text-xs font-medium transition-all ${lang === l ? 'bg-[#a855f7]/20 text-[#a855f7]' : 'bg-white/5 text-white/40 hover:text-white/60'}`}>
+                    {l === 'en' ? 'English' : '日本語'}
+                  </button>
+                ))}
+              </div>
+            </SettingsRow>
+          </div>
+        </div>
+
+        {/* Playback */}
+        <div className="mb-5">
+          <div className="flex items-center gap-2 mb-1 px-1">
+            <PlayCircle className="w-3.5 h-3.5 text-[#00d4ff]" />
+            <h2 className="text-xs font-bold text-white/40 uppercase tracking-wider">{t('settings.playback')}</h2>
+          </div>
+          <div className="rounded-xl glass divide-y divide-white/5 px-4">
+            <SettingsRow icon={Play} label={t('settings.autoplay')} desc={t('settings.autoplayDesc')} color="#00d4ff">
+              <SettingsToggle enabled={autoplay} onToggle={() => { setAutoplay(!autoplay); addToast(autoplay ? 'Autoplay disabled' : 'Autoplay enabled', 'success') }} color="#00d4ff" />
+            </SettingsRow>
+            <SettingsRow icon={SkipForward} label={t('settings.skipIntro')} desc={t('settings.skipIntroDesc')} color="#00d4ff">
+              <SettingsToggle enabled={skipIntro} onToggle={() => { setSkipIntro(!skipIntro); addToast(skipIntro ? 'Auto-skip disabled' : 'Auto-skip enabled', 'success') }} color="#00d4ff" />
+            </SettingsRow>
+            <SettingsRow icon={Monitor} label={t('settings.defaultQuality')} color="#00d4ff">
+              <select value={quality} onChange={e => { setQuality(e.target.value); addToast(`Quality set to ${e.target.value}`, 'success') }}
+                className="bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-xs text-white/70 outline-none cursor-pointer">
+                <option value="auto">Auto</option>
+                <option value="1080p">1080p</option>
+                <option value="720p">720p</option>
+                <option value="480p">480p</option>
+              </select>
+            </SettingsRow>
+          </div>
+        </div>
+
+        {/* Notifications */}
+        <div className="mb-5">
+          <div className="flex items-center gap-2 mb-1 px-1">
+            <BellRing className="w-3.5 h-3.5 text-[#ff2d78]" />
+            <h2 className="text-xs font-bold text-white/40 uppercase tracking-wider">{t('settings.notifications')}</h2>
+          </div>
+          <div className="rounded-xl glass divide-y divide-white/5 px-4">
+            <SettingsRow icon={Bell} label={t('settings.newEpisodes')} desc={t('settings.newEpisodesDesc')} color="#ff2d78">
+              <SettingsToggle enabled={notifEpisodes} onToggle={() => setNotifEpisodes(!notifEpisodes)} color="#ff2d78" />
+            </SettingsRow>
+            <SettingsRow icon={Star} label={t('settings.recommendations')} desc={t('settings.recommendationsDesc')} color="#ff2d78">
+              <SettingsToggle enabled={notifRecs} onToggle={() => setNotifRecs(!notifRecs)} color="#ff2d78" />
+            </SettingsRow>
+            <SettingsRow icon={User} label={t('settings.creatorUpdates')} desc={t('settings.creatorUpdatesDesc')} color="#ff2d78">
+              <SettingsToggle enabled={notifCreators} onToggle={() => setNotifCreators(!notifCreators)} color="#ff2d78" />
+            </SettingsRow>
+          </div>
+        </div>
+
+        {/* Subscription */}
+        <div className="mb-5">
+          <div className="flex items-center gap-2 mb-1 px-1">
+            <CreditCard className="w-3.5 h-3.5 text-[#ffd600]" />
+            <h2 className="text-xs font-bold text-white/40 uppercase tracking-wider">{t('settings.manageSubscription')}</h2>
+          </div>
+          <div className="rounded-xl glass px-4">
+            <div className="py-4">
+              <div className="flex items-center justify-between mb-3">
+                <div>
+                  <p className="text-sm font-medium text-white/80">Current Plan</p>
+                  <p className="text-xs text-white/30 mt-0.5">{user?.subscription === 'free' ? 'Limited access to content' : user?.subscription === 'basic' ? 'Ad-free viewing + basic premium' : 'Full access to all content'}</p>
+                </div>
+                <Badge className="text-xs px-3 py-1 border-0 font-bold" style={{ background: `${tierColor}20`, color: tierColor }}>
+                  {tierLabel}
+                </Badge>
+              </div>
+              <div className="flex gap-2">
+                {user?.subscription !== 'premium' && (
+                  <Button size="sm" onClick={() => openPremiumModal()}
+                    className="h-8 px-4 text-xs font-semibold bg-gradient-to-r from-[#ff2d78] to-[#a855f7] hover:opacity-90 border-0 gap-1.5">
+                    <Crown className="w-3.5 h-3.5" />{t('profile.upgrade')}
+                  </Button>
+                )}
+                {user?.subscription !== 'free' && (
+                  <Button size="sm" variant="outline" onClick={() => { setSubscription('free'); addToast('Downgraded to Free plan', 'info') }}
+                    className="h-8 px-3 text-xs border-white/10 text-white/40 hover:bg-white/5">
+                    Cancel Plan
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Data & Privacy */}
+        <div className="mb-5">
+          <div className="flex items-center gap-2 mb-1 px-1">
+            <Shield className="w-3.5 h-3.5 text-[#00ffaa]" />
+            <h2 className="text-xs font-bold text-white/40 uppercase tracking-wider">{t('settings.dataPrivacy')}</h2>
+          </div>
+          <div className="rounded-xl glass divide-y divide-white/5 px-4">
+            <SettingsRow icon={Trash2} label={t('settings.clearHistory')} desc={t('settings.clearHistoryDesc')} color="#00ffaa">
+              <button onClick={handleClearHistory}
+                className={`px-3 py-1 rounded-lg text-xs font-medium transition-all ${confirmClear ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 'bg-white/5 text-white/40 hover:text-white/60'}`}>
+                {confirmClear ? 'Confirm Clear' : 'Clear'}
+              </button>
+            </SettingsRow>
+          </div>
+        </div>
+
+        {/* About */}
+        <div className="mb-5">
+          <div className="flex items-center gap-2 mb-1 px-1">
+            <Info className="w-3.5 h-3.5 text-white/30" />
+            <h2 className="text-xs font-bold text-white/40 uppercase tracking-wider">{t('settings.about')}</h2>
+          </div>
+          <div className="rounded-xl glass divide-y divide-white/5 px-4">
+            <SettingsRow icon={Info} label={t('settings.version')} color="#ffffff">
+              <span className="text-xs text-white/30">2.0.0</span>
+            </SettingsRow>
+            <SettingsRow icon={FileText} label={t('settings.terms')} color="#ffffff">
+              <ExternalLink className="w-3.5 h-3.5 text-white/20" />
+            </SettingsRow>
+            <SettingsRow icon={Lock} label={t('settings.privacy')} color="#ffffff">
+              <ExternalLink className="w-3.5 h-3.5 text-white/20" />
+            </SettingsRow>
+          </div>
+        </div>
+
+        {/* Sign Out */}
+        <button onClick={() => { addToast('Signed out', 'info', '👋') }}
+          className="w-full rounded-xl glass px-4 py-3.5 flex items-center justify-center gap-2 text-sm font-medium text-red-400/70 hover:text-red-400 hover:bg-red-500/5 transition-all">
+          <LogOut className="w-4 h-4" />
+          {t('settings.signOut')}
+        </button>
       </div>
     </ScrollArea>
   )

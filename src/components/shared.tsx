@@ -399,7 +399,9 @@ export function Sidebar() {
         <Globe className="w-4 h-4" />
         <span className="text-[8px] font-medium leading-none">{lang === 'en' ? 'EN' : 'JA'}</span>
       </button>
-      <button className="w-11 h-11 rounded-xl flex items-center justify-center text-white/30 hover:text-white/60 hover:bg-white/5 transition-all">
+      <button onClick={() => setView('settings')}
+        className={`w-11 h-11 rounded-xl flex items-center justify-center transition-all
+          ${view === 'settings' ? 'bg-white/10 text-white/80' : 'text-white/30 hover:text-white/60 hover:bg-white/5'}`}>
         <Settings className="w-4 h-4" />
       </button>
     </div>
@@ -408,7 +410,7 @@ export function Sidebar() {
 
 // ─── Top Bar ─────────────────────────────────────────
 export function TopBar() {
-  const { mode, searchQuery, setSearchQuery, searchOpen, setSearchOpen, setNewProjectModalOpen } = useApp()
+  const { mode, view, setView, searchQuery, setSearchQuery, searchOpen, setSearchOpen, setNewProjectModalOpen, addToast } = useApp()
   const { t } = useI18n()
   const filteredShorts = searchQuery.length > 1 ? SHORTS.filter(s =>
     s.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -451,11 +453,13 @@ export function TopBar() {
             <Plus className="w-3.5 h-3.5" />{t('common.newProject')}
           </Button>
         )}
-        <button className="w-9 h-9 rounded-xl flex items-center justify-center text-white/40 hover:text-white/70 hover:bg-white/5 transition-all relative">
+        <button onClick={() => addToast('No new notifications', 'info', '🔔')}
+          className="w-9 h-9 rounded-xl flex items-center justify-center text-white/40 hover:text-white/70 hover:bg-white/5 transition-all relative">
           <Bell className="w-4 h-4" />
           <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#ff2d78]" />
         </button>
-        <button className="w-9 h-9 rounded-xl overflow-hidden niji-gradient-border">
+        <button onClick={() => setView('profile')}
+          className={`w-9 h-9 rounded-xl overflow-hidden transition-all ${view === 'profile' ? 'ring-2 ring-[#ff2d78]/50' : 'niji-gradient-border'}`}>
           <div className="w-full h-full rounded-xl bg-gradient-to-br from-[#ff2d78] to-[#a855f7] flex items-center justify-center text-xs font-bold text-white">H</div>
         </button>
       </div>

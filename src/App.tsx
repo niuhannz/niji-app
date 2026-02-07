@@ -3,7 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { AppProvider, useApp } from '@/lib/context'
 import { I18nProvider } from '@/lib/i18n'
 import { ToastContainer, ShareModal, NewProjectModal, Sidebar, TopBar } from '@/components/shared'
-import { HomeFeed, Discover, Player, Library, ProfileView } from '@/components/consumer'
+import { HomeFeed, Discover, Player, Library, ProfileView, SettingsView } from '@/components/consumer'
 import { StudioDashboard, AIGenerator, CharacterLab, TimelineEditor } from '@/components/studio'
 import { PremiumModal } from '@/components/premium/SubscriptionGuard'
 import { SeriesPage } from '@/pages/SeriesPage'
@@ -50,6 +50,7 @@ function ViewRouter() {
     case 'player': return <Player />
     case 'library': return <Library />
     case 'profile': return <ProfileView />
+    case 'settings': return <SettingsView />
     case 'studio': return <StudioDashboard />
     case 'ai-gen': return <AIGenerator />
     case 'char-lab': return <CharacterLab />

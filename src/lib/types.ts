@@ -1,4 +1,4 @@
-export type View = 'home' | 'discover' | 'player' | 'library' | 'studio' | 'ai-gen' | 'char-lab' | 'timeline' | 'profile'
+export type View = 'home' | 'discover' | 'player' | 'library' | 'studio' | 'ai-gen' | 'char-lab' | 'timeline' | 'profile' | 'settings'
 export type Mode = 'watch' | 'create'
 
 // ─── Content Types ─────────────────────────────────────
